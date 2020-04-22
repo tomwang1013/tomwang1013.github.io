@@ -64,7 +64,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -100,23 +100,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -209,7 +209,13 @@
 <p>当时我们提到，root的_vnode的<code>componentInstance</code>中存储了App组件的实例(后面称为app)：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> child = vnode.componentInstance = createComponentInstanceForVnode(</span><br><span class="line">  vnode,</span><br><span class="line">  activeInstance</span><br><span class="line">)</span><br><span class="line">child.$mount(hydrating ? vnode.elm : <span class="literal">undefined</span>, hydrating)</span><br></pre></td></tr></table></figure>
 <p>在app这个实例mount之后，我们把app.$el插入到页面上整个root就渲染出来了，其中的数据结构如下：</p>
-<p><img src="../images/1541987629081.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1541987629081.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>本篇中我们详细看看<code>app</code>的创建及首次渲染过程，我们从createComponentInstanceForVnode开始，在本例中，我们传给你它的2个参数依次为<code>root._vnode</code>和<code>root</code>：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">createComponentInstanceForVnode</span> (<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  vnode: any, <span class="regexp">//</span> we know it<span class="string">'s MountedComponentVNode but flow doesn'</span>t</span></span></span><br><span class="line"><span class="function"><span class="params">  parent: any, <span class="regexp">//</span> activeInstance in lifecycle state</span></span></span><br><span class="line"><span class="function"><span class="params"></span>): <span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> options: InternalComponentOptions = &#123;</span><br><span class="line">    _isComponent: <span class="literal">true</span>,</span><br><span class="line">    _parentVnode: vnode,</span><br><span class="line">    parent</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> vnode.componentOptions.Ctor(options)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>App的构造函数是<code>Vue.extend</code>中定义的，最终会调用<code>Vue.prototype._init</code>进行初始化：</p>
@@ -235,7 +241,13 @@
 <p>在render之前我们设置了实例的<code>$vnode</code>属性，render之后又设置了vnode.parent属性，<code>_render</code>函数返回的vnode传入<code>_update</code>，我们看看update：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/lifecycle.js</span></span><br><span class="line">Vue.prototype._update = <span class="function"><span class="keyword">function</span> (<span class="params">vnode: VNode, hydrating?: boolean</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> vm: Component = <span class="keyword">this</span></span><br><span class="line">  <span class="keyword">const</span> prevEl = vm.$el</span><br><span class="line">  <span class="keyword">const</span> prevVnode = vm._vnode</span><br><span class="line">  <span class="keyword">const</span> prevActiveInstance = activeInstance</span><br><span class="line">  activeInstance = vm</span><br><span class="line">  vm._vnode = vnode</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Vue.prototype.__patch__ is injected in entry points</span></span><br><span class="line">  <span class="comment">// based on the rendering backend used.</span></span><br><span class="line">  <span class="keyword">if</span> (!prevVnode) &#123;</span><br><span class="line">    <span class="comment">// initial render</span></span><br><span class="line">    vm.$el = vm.__patch__(vm.$el, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// updates</span></span><br><span class="line">  &#125;</span><br><span class="line">  activeInstance = prevActiveInstance</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// if parent is an HOC, update its $el as well</span></span><br><span class="line">  <span class="keyword">if</span> (vm.$vnode &amp;&amp; vm.$parent &amp;&amp; vm.$vnode === vm.$parent._vnode) &#123;</span><br><span class="line">    vm.$parent.$el = vm.$el</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// updated hook is called by the scheduler to ensure that children are</span></span><br><span class="line">  <span class="comment">// updated in a parent's updated hook.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p><code>prevEl</code>和<code>prevVnode</code>分别保存之前的根元素(<code>$el</code>)和<code>_vnode</code>，在首次渲染之前，它们都是空的。然后设置新的<code>_vnode</code>，并在patch之后设置新的<code>$el</code>，并且在patch之前修改全局变量<code>activeInstance</code>，设置为自己，这里即app实例，patch完之后再还原成root。最后是一个if语句，在本例中是满足的，所以把root的根元素置为和app的一样，所以经过<code>_render</code>和<code>_update</code>时候数据结构变成：</p>
-<p><img src="../images/1542000170374.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542000170374.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>理解了大概的数据结构之后，我们再详细看看app的render和update过程</p>
 <h1 id="render"><a href="#render" class="headerlink" title="render"></a>render</h1><p>App组件的html模板为：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"app"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">alt</span>=<span class="string">"Vue logo"</span> <span class="attr">src</span>=<span class="string">"./assets/logo.png"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>hello, world!<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -276,7 +288,13 @@
 <p>这次createComponent是不会返回true的，且调用之后没有任何效果，因为这里的vnode只是一个div的包装而已。代码直接进入第一个if执行下面这行代码：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vnode.elm = nodeOps.createElement(tag, vnode)</span><br></pre></td></tr></table></figure>
 <p>它直接创建一个div元素！因为children还有2个vnode，所以再调用<code>createChildren</code>创建子元素，这样app的整个dom就创建好了，然后patch直接返回根元素。最后回到<code>_update</code>把这个元素赋给<code>vm.$el</code>，整个数据结构变成：</p>
-<p><img src="../images/1542003332390.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542003332390.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>在上一篇我们知道，这个根元素最终会被root插入到文档中从而展示在页面上。至此，下面这两三行简单的代码基本分析完了：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span></span><br><span class="line"><span class="keyword">new</span> Vue(&#123;</span><br><span class="line">  render: <span class="function"><span class="params">h</span> =&gt;</span> h(App),</span><br><span class="line">&#125;).$mount(<span class="string">'#app'</span>)</span><br></pre></td></tr></table></figure>
 <p>可以看到，这后面其实牵涉到很多逻辑，何况我们还省略了很多细节，但是更复杂的情况也能从这里推导出来。</p>
@@ -293,8 +311,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/vue-patch-2/" target="_blank" rel="external">http://tomwang1013.github.io/vue-patch-2/</a>
-        
     </div>
     
     <footer>
@@ -306,10 +322,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -414,32 +426,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -527,7 +513,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

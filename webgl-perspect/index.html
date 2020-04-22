@@ -21,13 +21,13 @@
     
     
     <meta name="keywords" content="webgl">
-    <meta name="description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：  我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情况下，相机也摆放在坐标系原点，和立方体处于同一个坐标系中，且使用的是右手坐标系：  摆放相机立方体建好之后第二个问题就是从哪个方向来观察它，也就是相机的摆放。默认情况下相机位于原点，也就是立方体的中心，且是往Z轴的负方向进">
+    <meta name="description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：                                                                                              steps              我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情">
 <meta name="keywords" content="webgl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="透视投影解析 - 从建模到像素（WebGL）">
 <meta property="og:url" content="http://tomwang1013.github.io/webgl-perspect/index.html">
 <meta property="og:site_name" content="tomwang1013的学习总结">
-<meta property="og:description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：  我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情况下，相机也摆放在坐标系原点，和立方体处于同一个坐标系中，且使用的是右手坐标系：  摆放相机立方体建好之后第二个问题就是从哪个方向来观察它，也就是相机的摆放。默认情况下相机位于原点，也就是立方体的中心，且是往Z轴的负方向进">
+<meta property="og:description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：                                                                                              steps              我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://tomwang1013.github.io/images/steps.png">
 <meta property="og:image" content="http://tomwang1013.github.io/images/default-cube.png">
@@ -39,7 +39,7 @@
 <meta property="og:updated_time" content="2020-04-18T01:47:22.384Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="透视投影解析 - 从建模到像素（WebGL）">
-<meta name="twitter:description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：  我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情况下，相机也摆放在坐标系原点，和立方体处于同一个坐标系中，且使用的是右手坐标系：  摆放相机立方体建好之后第二个问题就是从哪个方向来观察它，也就是相机的摆放。默认情况下相机位于原点，也就是立方体的中心，且是往Z轴的负方向进">
+<meta name="twitter:description" content="我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：                                                                                              steps              我们以一个立方体的绘制来说明这一过程 建模这一步很简单，我们的立方体中心位于坐标系原点，默认情">
 <meta name="twitter:image" content="http://tomwang1013.github.io/images/steps.png">
     
         <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
@@ -68,7 +68,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -104,23 +104,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -209,29 +209,71 @@
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
             <p>我们知道，在计算机图形学中物体从建模到展示在屏幕上需要经过大概下面几个坐标变换：</p>
-<p><img src="..\images\steps.png" alt="steps"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="..\images\steps.png" alt="steps" title="">
+                </div>
+                <div class="image-caption">steps</div>
+            </figure>
 <p>我们以一个立方体的绘制来说明这一过程</p>
 <h2 id="建模"><a href="#建模" class="headerlink" title="建模"></a>建模</h2><p>这一步很简单，我们的立方体中心位于坐标系原点，默认情况下，相机也摆放在坐标系原点，和立方体处于同一个坐标系中，且使用的是右手坐标系：</p>
-<p><img src="..\images\default-cube.png" alt="default cube"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="..\images\default-cube.png" alt="default cube" title="">
+                </div>
+                <div class="image-caption">default cube</div>
+            </figure>
 <h2 id="摆放相机"><a href="#摆放相机" class="headerlink" title="摆放相机"></a>摆放相机</h2><p>立方体建好之后第二个问题就是从哪个方向来观察它，也就是相机的摆放。默认情况下相机位于原点，也就是立方体的中心，且是往Z轴的负方向进行观察，这个时候我们只能看到立方体的后面一面。为了便于观察，我们需要调整相机的位置。我们可以想象相机上面固定住xyz坐标轴，相机移动时，坐标轴也跟着移动。相机摆放完之后，我们要重新计算立方体在新的坐标系下的坐标，观察方向不变，还是沿着新的Z轴负方向：</p>
-<p><img src="../images/default-cube-2.png" alt="default-cube-2"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/default-cube-2.png" alt="default-cube-2" title="">
+                </div>
+                <div class="image-caption">default-cube-2</div>
+            </figure>
 <p>已知原坐标系原点（O）、新坐标系原点（O’），及新坐标系y轴向量，就可以唯一确定这个变换，我们可以用一个函数调用表示：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 新原点：(nOx, nOy, nOz), y轴向量：(upx, upy, upz)</span></span><br><span class="line">lookAt(nOx, nOy, nOz, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, upx, upy, upz)</span><br></pre></td></tr></table></figure>
 <p>我们把<code>lookAt</code>确定的矩阵记为<code>Mv</code>,则立方体在新的相机坐标系下的坐标为：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">np = Mv * p</span><br></pre></td></tr></table></figure>
 <h2 id="投影并裁减"><a href="#投影并裁减" class="headerlink" title="投影并裁减"></a>投影并裁减</h2><p>为了清除地看到投影后的图形，我们考虑一种简单的投影情况：相机沿着原Z轴正方向移动10个单位：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lookAt(<span class="number">0</span>, <span class="number">0</span>, <span class="number">10</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-<p><img src="../images/1537254455887.png" alt="1537254455887"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537254455887.png" alt="1537254455887" title="">
+                </div>
+                <div class="image-caption">1537254455887</div>
+            </figure>
 <p>我们以新的原点为聚焦点做透视投影，以上下裁减面夹角、近裁减面宽高比、近远裁减面距离指定透视投影参数：</p>
-<p><img src="../images/1537255932260.png" alt="1537255932260"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537255932260.png" alt="1537255932260" title="">
+                </div>
+                <div class="image-caption">1537255932260</div>
+            </figure>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setPerspective(<span class="number">60</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
 <p>大家想想，这个时候我们的立方体在哪里呢？移动相机之后，立方体的前面的z坐标应该变成1 - 10 = 9，而后面的z坐标是-1 - 10 = -11，下面我们就看看经过这个投影之后，立方体前面在近裁减面上的投影位置及大小，通过简单作图可以看到：</p>
-<p><img src="../images/1537257435923.png" alt="1537257435923"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537257435923.png" alt="1537257435923" title="">
+                </div>
+                <div class="image-caption">1537257435923</div>
+            </figure>
 <p>可以看出立方体前面的成像高度为<code>1/9</code>，而近裁减面的高度为<code>tan(30)</code>，即$\sqrt{3}/3$，所以成像高度与近裁减面的高度比为：$\sqrt{3}/9$。</p>
 <h2 id="输出到视口"><a href="#输出到视口" class="headerlink" title="输出到视口"></a>输出到视口</h2><p>到最后一步了，我们假设视口是一个<code>400x400</code>的窗口，在WebGL中，即一个canvas：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">canvas</span> <span class="attr">id</span>=<span class="string">"webgl"</span> <span class="attr">width</span>=<span class="string">"400"</span> <span class="attr">height</span>=<span class="string">"400"</span>&gt;</span></span><br><span class="line">  Please use a browser that supports "canvas"</span><br><span class="line"><span class="tag">&lt;/<span class="name">canvas</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>我们需要把近裁减面映射到这个canvas，按照前面的推算，我们可以得到立方体的前面最终渲染到这个canvas上的高度为$\sqrt{3}/9*400$，大概为77个像素，最终的渲染结果如下：</p>
-<p><img src="../images/1537258598407.png" alt="1537258598407"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537258598407.png" alt="1537258598407" title="">
+                </div>
+                <div class="image-caption">1537258598407</div>
+            </figure>
 <p>黑色背景即为整个canvas，通过手动测量，确实是77个像素，说明以上的推算过程是正确的，完整的示例在<a href="../webgl-guide/ch07/HelloCube.html">这里</a>。</p>
 
         </div>
@@ -246,8 +288,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/webgl-perspect/" target="_blank" rel="external">http://tomwang1013.github.io/webgl-perspect/</a>
-        
     </div>
     
     <footer>
@@ -259,10 +299,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -367,32 +403,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -480,7 +490,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

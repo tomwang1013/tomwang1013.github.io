@@ -63,7 +63,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -99,23 +99,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -213,7 +213,13 @@
 <li>Rejected：计算过程中发生错误(<code>reject</code>被调用<strong>或者</strong>参数函数执行过程中有异常抛出<code>throw</code>)</li>
 </ul>
 <p>如果promise变成Resolved或Rejected，我们称promise已经稳定了(settled)，稳定之后promise的状态不再变化：</p>
-<p><img src="../../images/1538204868941.png" alt="1538204868941"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../../images/1538204868941.png" alt="1538204868941" title="">
+                </div>
+                <div class="image-caption">1538204868941</div>
+            </figure>
 <h3 id="消费-查询-使用promise"><a href="#消费-查询-使用promise" class="headerlink" title="消费/查询/使用promise"></a>消费/查询/使用promise</h3><p>一般都要关心promise的执行结果：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// onFulfilled处理resolved通知，onRejected处理rejected通知</span></span><br><span class="line">promise.then(onFulfilled, onRejected)</span><br><span class="line">promise.then(<span class="function"><span class="params">value</span> =&gt;</span> &#123; <span class="comment">/* fulfillment */</span> &#125;, error =&gt; &#123; <span class="comment">/* rejection */</span> &#125;)</span><br><span class="line"></span><br><span class="line">promise.then(<span class="literal">null</span>, error =&gt; &#123; <span class="comment">/* rejection */</span> &#125;);</span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">promise.catch(<span class="function"><span class="params">error</span> =&gt;</span> &#123; <span class="comment">/* rejection */</span> &#125;);</span><br></pre></td></tr></table></figure>
 <p>我们可以随时查询promise，无论它当时的状态是否是稳定的</p>
@@ -233,7 +239,13 @@
 <h3 id="使用普通值来resolve-q"><a href="#使用普通值来resolve-q" class="headerlink" title="使用普通值来resolve q"></a>使用普通值来resolve q</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">value1</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">123</span>;	<span class="comment">// q is a promise resolved with 123</span></span><br><span class="line">&#125;)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">value2</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(value2); <span class="comment">// 123</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <h3 id="使用另一个promise来resolve-q"><a href="#使用另一个promise来resolve-q" class="headerlink" title="使用另一个promise来resolve q"></a>使用另一个promise来resolve q</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">value1</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> r;	<span class="comment">// r is a promise, q = r</span></span><br><span class="line">&#125;)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">value2</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(value2);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p><code>resolve promise with normal value or another promise</code>状态示意图：</p>
-<p><img src="../images/1538211823168.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1538211823168.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <h3 id="resolve-q-from-onRejected"><a href="#resolve-q-from-onRejected" class="headerlink" title="resolve q from onRejected"></a>resolve q from <code>onRejected</code></h3><p>从<code>onRejected</code>中返回的值一样可以用来resolve(<em>不是reject</em>) q：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.catch(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// Something went wrong, use a default value</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">'Untitled.txt'</span>;</span><br><span class="line">&#125;)</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">fileName</span>) </span>&#123;</span><br><span class="line">    ···</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <h3 id="通过抛出异常来reject-q-这个时候没有reject方法可以调用"><a href="#通过抛出异常来reject-q-这个时候没有reject方法可以调用" class="headerlink" title="通过抛出异常来reject q(这个时候没有reject方法可以调用)"></a>通过抛出异常来reject q(这个时候没有reject方法可以调用)</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.then(<span class="function"><span class="keyword">function</span> (<span class="params">value</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>();</span><br><span class="line">&#125;)</span><br><span class="line">.catch(<span class="function"><span class="keyword">function</span> (<span class="params">reason</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// Handle error here</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
@@ -280,8 +292,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/promise/" target="_blank" rel="external">http://tomwang1013.github.io/promise/</a>
-        
     </div>
     
     <footer>
@@ -293,10 +303,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -401,32 +407,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -514,7 +494,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

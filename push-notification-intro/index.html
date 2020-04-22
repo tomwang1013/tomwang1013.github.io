@@ -65,7 +65,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -101,23 +101,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -233,7 +233,13 @@
 <li>SW收到消息，展示出来</li>
 </ol>
 <p>整个过程图示如下：</p>
-<p><img src="../images/push-noti.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/push-noti.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>下面进入show me the code阶段，分步讲解每个步骤：</p>
 <h2 id="client订阅消息"><a href="#client订阅消息" class="headerlink" title="client订阅消息"></a>client订阅消息</h2><ul>
 <li><p>获得通知权限</p>
@@ -281,9 +287,21 @@
 </li>
 </ul>
 <p>根据上面的设置，在chrome上的效果如下：</p>
-<p><img src="../images/1543563022606.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1543563022606.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>而在firefox上actions却没有生效：</p>
-<p><img src="../images/1543563131893.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1543563131893.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>可见，每个浏览器的支持还不一样</p>
 <h3 id="处理用户点击"><a href="#处理用户点击" class="headerlink" title="处理用户点击"></a>处理用户点击</h3><p>用户看到通知之后，可以选择关闭弹窗(如果有关闭按钮)或点击上面的任何区域，如果有actions按钮的话还可以点击按钮，点击之后SW会收到<code>notificationclick</code>事件：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">self.addEventListener(<span class="string">'notificationclick'</span>, event =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> notification = event.notification;</span><br><span class="line">  <span class="keyword">const</span> primaryKey = notification.data.primaryKey;</span><br><span class="line">  <span class="keyword">const</span> action = event.action;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (action !== <span class="string">'close'</span>) &#123;</span><br><span class="line">    event.waitUntil(</span><br><span class="line">      clients.openWindow(<span class="string">'samples/page'</span> + primaryKey + <span class="string">'.html'</span>)</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  notification.close();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
@@ -314,8 +332,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/push-notification-intro/" target="_blank" rel="external">http://tomwang1013.github.io/push-notification-intro/</a>
-        
     </div>
     
     <footer>
@@ -327,10 +343,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -435,32 +447,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -548,7 +534,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

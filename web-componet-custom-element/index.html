@@ -66,7 +66,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -102,23 +102,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -279,22 +279,52 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">customElements.whenDefined(<span class="string">'x-clock'</span>).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'x-clock defined'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>我们来测试一下，页面如下：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>现在是未定义的：<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"reg"</span>&gt;</span>点击注册clock<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">x-clock</span>&gt;</span><span class="tag">&lt;/<span class="name">x-clock</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"main.mjs"</span> <span class="attr">type</span>=<span class="string">"module"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="../images/1540262306376.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540262306376.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// clock.mjs</span></span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">HTMLClockElement</span> <span class="keyword">extends</span> <span class="title">HTMLElement</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">    <span class="keyword">this</span>.innerHTML = <span class="string">'i am a clock custom element'</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'custom element created'</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 指定需要观察的属性</span></span><br><span class="line">  <span class="keyword">static</span> get observedAttributes() &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">'disabled'</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  connectedCallback() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'insert into dom'</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  disconnectedCallback() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'removed from dom'</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  attributeChangedCallback(attrName, oldVal, newVal) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;attrName&#125;</span> changed from <span class="subst">$&#123;oldVal&#125;</span> to <span class="subst">$&#123;newVal&#125;</span>`</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  adoptedCallback() &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'move to new document'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.mjs</span></span><br><span class="line"><span class="keyword">import</span> &#123; HTMLClockElement &#125; <span class="keyword">from</span> <span class="string">'./clock.mjs'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'reg'</span>).addEventListener(<span class="string">'click'</span>, (e) =&gt; &#123;</span><br><span class="line">  customElements.define(<span class="string">'x-clock'</span>, HTMLClockElement);</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">customElements.whenDefined(<span class="string">'x-clock'</span>).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'x-clock defined'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>刚开始的时候自定义元素没有注册，虽然我们使用了它，但是控制台没有任何打印任何信息，元素内容也没有渲染出来；当我们点击按钮时，元素被注册，内容也渲染出来了：</p>
-<p><img src="../images/1540262867740.png" alt=""></p>
-<p><img src="../images/1540262877824.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540262867740.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540262877824.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <h1 id="自定义元素的展示"><a href="#自定义元素的展示" class="headerlink" title="自定义元素的展示"></a>自定义元素的展示</h1><h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><p>自定义元素默认是空的，没有内容也没有样式，这显然没啥卵用，我们第一步先填充点内容，最简单的方式是直接在标签里面指定内容，就像普通的<code>div</code>元素一样：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">x-clock</span>&gt;</span>i am a clock<span class="tag">&lt;/<span class="name">x-clock</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="../images/1540264685155.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540264685155.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>这个时候自定义元素的内容完全取决于使用者，一般我们是不会这样做的，因为使用自定义元素(进而是web component)就是为了封装，所以一般是自己控制里面的内容。</p>
 <p>可以在<code>constructor</code>中直接设置<code>innerHTML</code>属性(注意：在<code>constructor</code>中能做的事有一定的限制<a href="https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-conformance" target="_blank" rel="noopener">spec</a>)：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constructor</span>() &#123;</span><br><span class="line">   <span class="keyword">super</span>();</span><br><span class="line">   <span class="keyword">this</span>.innerHTML = <span class="string">'i am a clock'</span></span><br><span class="line">   <span class="built_in">console</span>.log(<span class="string">'custom element created'</span>)</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
 <h2 id="样式"><a href="#样式" class="headerlink" title="样式"></a>样式</h2><p>自定义标签和其他标签一样，可以为它设置任何样式，如：</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">x-clock</span> &#123;</span><br><span class="line">  <span class="attribute">display</span>: block;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">100px</span>;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">40px</span>;</span><br><span class="line">  <span class="attribute">margin-top</span>: <span class="number">10px</span>;</span><br><span class="line">  <span class="attribute">color</span>: red;</span><br><span class="line">  <span class="attribute">border</span>: <span class="number">1px</span> solid blue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>效果：</p>
-<p><img src="../images/1540264712762.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540264712762.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>为了更好地控制元素注册前后的展示效果，我们可以利用<code>:defined</code>伪类，它可以用来选取一定注册了的自定义元素，所以我们可以给未注册的元素单独设置样式：</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">x-clock</span><span class="selector-pseudo">:not(</span><span class="selector-pseudo">:defined)</span> &#123;</span><br><span class="line">  <span class="attribute">opacity</span>: <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>自定义元素作为web component的重要组成部分，使得我们可以定制新的标签，标签中的内容由自己定义，有一定的封装作用。但是一旦元素被渲染出来，它和其他内置元素完全一样：里面的dom结构完全暴露在外面(通过document.queryBy***直接获取)，它的内部dom样式也会受外部css的影响，这离我们想要的组件封装还有一定的距离。</p>
@@ -312,8 +342,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/web-componet-custom-element/" target="_blank" rel="external">http://tomwang1013.github.io/web-componet-custom-element/</a>
-        
     </div>
     
     <footer>
@@ -325,10 +353,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -433,32 +457,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -546,7 +544,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

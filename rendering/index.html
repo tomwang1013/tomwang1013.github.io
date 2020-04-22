@@ -70,7 +70,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -106,23 +106,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -213,7 +213,13 @@
             <p>这篇文章的主要素材来源于google开发文档：<a href="https://developers.google.com/web/fundamentals/performance/rendering/，算是做一个总结再加上自己的一些理解，做一个备忘录" target="_blank" rel="noopener">https://developers.google.com/web/fundamentals/performance/rendering/，算是做一个总结再加上自己的一些理解，做一个备忘录</a></p>
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>显示器是以一个固定速度刷新屏幕的，一般是每秒60帧，我们可以想象浏览器里面有一个保存当前浏览器内容的渲染缓存，有一个独立的线程每隔大约16.6ms从这个缓存中把浏览器内容刷新到屏幕上，而浏览器的渲染便是刷新这个缓存。</p>
 <p>浏览器绘制一帧主要需要经过下面5步：</p>
-<p><img src="../images/1537324920067.png" alt="1537324920067"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537324920067.png" alt="1537324920067" title="">
+                </div>
+                <div class="image-caption">1537324920067</div>
+            </figure>
 <ul>
 <li><p>javascript</p>
 <p>在javascript中可以做一些引起视觉变化的动作，如修改样式、操作dom等</p>
@@ -257,7 +263,13 @@
 </ul>
 <h3 id="用requestAnimationRequest来做视觉变化"><a href="#用requestAnimationRequest来做视觉变化" class="headerlink" title="用requestAnimationRequest来做视觉变化"></a>用requestAnimationRequest来做视觉变化</h3><p>前面提到了<code>raf</code>，这里我们正式介绍一下。简单地说，raf中注册的callback会在每一帧绘制开始的时候被调用。这里的<em>每一帧开始</em>可以理解为我们刚开始提到的屏幕以60帧每秒刷新的每一帧的开始，也是上一帧的结束点。就是说，从这个开始点开始，过大约16.6ms，屏幕会再次刷新。所以，你在raf中做的视觉变化(如样式修改，dom操作等)会在下一帧中得到展示(当然这些变化需要在16.6ms之内被浏览器更新)。</p>
 <p>在raf出来之前，我们做视觉修改的时机和屏幕刷新时机是完全独立的，这会导致丢帧的情况，就是我我们的修改不会在下一帧显示出来，而是下下帧才显示出来，比如你用<code>setTimeout</code>在某个时间点做了修改，可能就会出现这种情形：</p>
-<p><img src="../images/1537335693692.png" alt="1537335693692"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537335693692.png" alt="1537335693692" title="">
+                </div>
+                <div class="image-caption">1537335693692</div>
+            </figure>
 <p>如果我们能把js中的视觉修改提前到当前帧的开始处，那就能在下一帧得到展示，而唯一能达到这个目的的做法就是使用raf</p>
 <h2 id="减少样式计算的作用范围及复杂性"><a href="#减少样式计算的作用范围及复杂性" class="headerlink" title="减少样式计算的作用范围及复杂性"></a>减少样式计算的作用范围及复杂性</h2><p>这一节没啥好说的，一是使用简单的选择器，尽量使用class：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bad</span></span><br><span class="line">.box:nth-last-child(-n+<span class="number">1</span>) .title &#123;</span><br><span class="line">  <span class="comment">/* styles */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// good</span></span><br><span class="line">.final-box-title &#123;</span><br><span class="line">  <span class="comment">/* styles */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -295,10 +307,28 @@
 </li>
 </ul>
 <h2 id="坚持使用只影响合成的css属性-下面简称”合成相关”-及合理使用渲染层"><a href="#坚持使用只影响合成的css属性-下面简称”合成相关”-及合理使用渲染层" class="headerlink" title="坚持使用只影响合成的css属性(下面简称”合成相关”)及合理使用渲染层"></a>坚持使用只影响合成的css属性(下面简称”合成相关”)及合理使用渲染层</h2><p>上一节提过，有两个属性的修改不会引起重绘，这2个属性就是 transform 和 opacity：</p>
-<p><img src="../images/1537350905247.png" alt="1537350905247"></p>
-<p><img src="../images/1537351412290.png" alt="1537351412290"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537350905247.png" alt="1537350905247" title="">
+                </div>
+                <div class="image-caption">1537350905247</div>
+            </figure>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537351412290.png" alt="1537351412290" title="">
+                </div>
+                <div class="image-caption">1537351412290</div>
+            </figure>
 <p>所以在做动画时使用这2个属性是效率最高的：浏览器会把元素临时提升到独立层，不用绘制，直接合成。注意：如果需要将元素永久性地提升到独立层，需要使用上面提到的<code>will-change</code>或<code>transform</code>属性：</p>
-<p><img src="../images/1537355072366.png" alt="1537355072366"></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537355072366.png" alt="1537355072366" title="">
+                </div>
+                <div class="image-caption">1537355072366</div>
+            </figure>
 <h2 id="考虑在事件处理中使用防节流机制"><a href="#考虑在事件处理中使用防节流机制" class="headerlink" title="考虑在事件处理中使用防节流机制"></a>考虑在事件处理中使用防节流机制</h2><ul>
 <li><p>避免在事件处理中改变样式</p>
 <p>事件处理是在<code>raf</code>之前执行的，如果你在事件处理中修改了样式，然后在raf中读取了样式，就可能导致前面提到的回流：</p>
@@ -322,8 +352,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/rendering/" target="_blank" rel="external">http://tomwang1013.github.io/rendering/</a>
-        
     </div>
     
     <footer>
@@ -335,10 +363,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -443,32 +467,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -556,7 +554,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

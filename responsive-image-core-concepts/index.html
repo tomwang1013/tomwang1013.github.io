@@ -62,7 +62,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -98,23 +98,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -239,7 +239,13 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">figure</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">picture</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">source</span> <span class="attr">media</span>=<span class="string">"(min-width: 750px)"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">srcset</span>=<span class="string">"images/horses-1600_large_2x.jpg 2x,</span></span></span><br><span class="line"><span class="tag"><span class="string">                      images/horses-800_large_1x.jpg"</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">source</span> <span class="attr">media</span>=<span class="string">"(min-width: 500px)"</span></span></span><br><span class="line"><span class="tag">              <span class="attr">srcset</span>=<span class="string">"images/horses_medium.jpg"</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"images/horses_small.jpg"</span> <span class="attr">alt</span>=<span class="string">"Horses in Hawaii"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">picture</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">figcaption</span>&gt;</span>Horses in Hawaii<span class="tag">&lt;/<span class="name">figcaption</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">figure</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>浏览器会找到第一个满足media条件的source，否则使用后面的img元素。source和img中的srcset和sizes和前面将的一样处理，唯一值得注意的是source中不能使用src属性来指定默认图片，但是可以在srcset中指定默认图片</p>
 <p>我们还可是使用picture来选择图片格式，如对新的浏览器使用webp等高级图片格式：</p>
-<p><img src="../images/1542889563147.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542889563147.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>参考文档：</p>
 <p><a href="https://jakearchibald.com/2015/anatomy-of-responsive-images/" target="_blank" rel="noopener">https://jakearchibald.com/2015/anatomy-of-responsive-images/</a></p>
 <p><a href="https://developers.google.com/web/ilt/pwa/lab-responsive-images" target="_blank" rel="noopener">https://developers.google.com/web/ilt/pwa/lab-responsive-images</a></p>
@@ -256,8 +262,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/responsive-image-core-concepts/" target="_blank" rel="external">http://tomwang1013.github.io/responsive-image-core-concepts/</a>
-        
     </div>
     
     <footer>
@@ -269,10 +273,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -377,32 +377,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -490,7 +464,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

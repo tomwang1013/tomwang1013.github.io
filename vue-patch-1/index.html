@@ -62,7 +62,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -98,23 +98,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -275,7 +275,13 @@
 <p>接下来就是insert操作，这才是真正的dom操作，把这个渲染好的根元素插入到指定位置：<code>insert(parentElm, vnode.elm, refElm)</code>：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">insert</span> (<span class="params">parent, elm, ref</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (isDef(parent)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (isDef(ref)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (nodeOps.parentNode(ref) === parent) &#123;</span><br><span class="line">        nodeOps.insertBefore(parent, elm, ref)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      nodeOps.appendChild(parent, elm)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>至此，根组件就展示在页面上面了：</p>
-<p><img src="../images/1541864549578.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1541864549578.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>由于createComponent返回true，createElm直接返回，这样patch继续：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js	</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">patch</span> (<span class="params">oldVnode, vnode, hydrating, removeOnly</span>) </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (isUndef(oldVnode)) &#123;</span><br><span class="line">     ...</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">if</span> (!isRealElement &amp;&amp; sameVnode(oldVnode, vnode)) &#123;</span><br><span class="line">       ...</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">// create new node</span></span><br><span class="line">       createElm(</span><br><span class="line">         vnode,</span><br><span class="line">         insertedVnodeQueue,</span><br><span class="line">         <span class="comment">// extremely rare edge case: do not insert if old element is in a</span></span><br><span class="line">         <span class="comment">// leaving transition. Only happens when combining transition +</span></span><br><span class="line">         <span class="comment">// keep-alive + HOCs. (#4590)</span></span><br><span class="line">         oldElm._leaveCb ? <span class="literal">null</span> : parentElm,</span><br><span class="line">         nodeOps.nextSibling(oldElm)</span><br><span class="line">       )</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 继续</span></span><br><span class="line">      </span><br><span class="line">       <span class="comment">// destroy old node</span></span><br><span class="line">       <span class="keyword">if</span> (isDef(parentElm)) &#123;</span><br><span class="line">         removeVnodes(parentElm, [oldVnode], <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (isDef(oldVnode.tag)) &#123;</span><br><span class="line">         ...</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> vnode.elm</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
 <p>我们新创建了一个根元素(vnode.elm)，所以需要把以前的删掉：<code>removeVnodes(parentElm, [oldVnode], 0, 0)</code>。然后就返回新的根元素，重新回到<code>_update</code>：</p>
@@ -294,8 +300,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/vue-patch-1/" target="_blank" rel="external">http://tomwang1013.github.io/vue-patch-1/</a>
-        
     </div>
     
     <footer>
@@ -307,10 +311,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -415,32 +415,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -528,7 +502,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

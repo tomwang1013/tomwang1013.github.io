@@ -75,7 +75,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -111,23 +111,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -227,42 +227,114 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p1<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p2<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>这里的<code>div</code>元素有两个子元素；除此之外，我们还可以在它上面依附(attach)另一个dom树：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> div = <span class="built_in">document</span>.getElementById(<span class="string">'to-attach-shadow'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// attach a shadow dom tree to it</span></span><br><span class="line"><span class="keyword">const</span> shadowRoot = div.attachShadow(&#123; <span class="attr">mode</span>: <span class="string">'open'</span> &#125;);</span><br><span class="line">shadowRoot.innerHTML = <span class="string">'&lt;p&gt;shadow p1&lt;/p&gt;&lt;p&gt;shadow p2&lt;/p&gt;'</span>;</span><br></pre></td></tr></table></figure>
-<p><img src="../images/1540274643627.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540274643627.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>依附的这个dom树就是shadow dom，它的根节点叫<strong>shadow root</strong>，而它依附的元素(这里的div)叫<strong>shadow host</strong>：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">div.shadowRoot === shadowRoot <span class="comment">// true</span></span><br><span class="line">shadowRoot.host === div <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
 <p>那这里的渲染结果是什么？根据之前custom element中的例子，我们应该才到原来的内容被丢弃了，渲染出来的是shadow dom中的内容：</p>
-<p><img src="../images/1540275086006.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275086006.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <h2 id="Isolated-DOM"><a href="#Isolated-DOM" class="headerlink" title="Isolated DOM"></a>Isolated DOM</h2><p>这里我们通过<code>document.querySelectorAll</code>只能得到原来的两个p元素：</p>
-<p><img src="../images/1540275540129.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275540129.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>shadow dom中的内容没法通过正常途径查询出来，只能通过shadow root来查：</p>
-<p><img src="../images/1540275645122.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275645122.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <h2 id="不是所有的元素都可以attach-shadow-dom"><a href="#不是所有的元素都可以attach-shadow-dom" class="headerlink" title="不是所有的元素都可以attach shadow dom"></a>不是所有的元素都可以attach shadow dom</h2><p>有些元素(如：textarea，video等)浏览器已经使用了shadow dom来实现了，你不能再加了；有些元素加shadow dom没有任何意义，如img。所以，只有部分元素可以添加shadow dom，当然这部分元素包含了所有合法的custom elements，参考<a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow" target="_blank" rel="noopener">attachShadow</a>查看具体哪些元素可以</p>
 <h1 id="内容分发与slot"><a href="#内容分发与slot" class="headerlink" title="内容分发与slot"></a>内容分发与slot</h1><p>我们把元素原来的子节点dom结构称为<strong>light dom</strong>，前面我们知道，默认情况下light dom是不会渲染出来的，最终的渲染结果完全由其上依附的shadow dom决定:</p>
-<p><img src="../images/1540285980857.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540285980857.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>这样不是很灵活，有时候我们希望由组件的使用者和开发者共同决定最终的渲染内容，这就是<strong>slot</strong>的由来：我们可以在shadow dom里面指定一些slot(插槽)，用来接收来自light dom中的内容，例如：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
 <p>上面的代码将整个light dom的内容插入到slot指定位置，渲染结果：</p>
-<p><img src="../images/1540287137492.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287137492.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>shadow dom结构：</p>
-<p><img src="../images/1540287198222.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287198222.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>slot还可以指定<code>name</code>属性，然后在light dom中可以通过在元素上指定<code>slot=slotName</code>将对应元素渲染到指定的slot中，例如：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name="slot1"&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"to-attach-shadow"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span> <span class="attr">slot</span>=<span class="string">"slot1"</span>&gt;</span>p1<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p2<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
 <p>渲染结果：</p>
-<p><img src="../images/1540287536883.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287536883.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>dom结构：</p>
-<p><img src="../images/1540287575786.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287575786.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>light dom中没有指定slot属性的都被渲染到默认的匿名slot中</p>
 <h1 id="shadow-dom样式"><a href="#shadow-dom样式" class="headerlink" title="shadow dom样式"></a>shadow dom样式</h1><h2 id="scoped-css"><a href="#scoped-css" class="headerlink" title="scoped css"></a>scoped css</h2><p>shadow dom内部的元素样式不受外部css影响，内部定义的css也只作用于内部的元素，不影响外部，你可以把shadow root看做是一个屏障，把shadow dom和外面隔开了。比如说我们在外面定义了样式：</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">p</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">200%</span>;</span><br><span class="line">  <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个样式只影响light dom，对shadow dom没有影响：</p>
-<p><img src="../images/1540288132596.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540288132596.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>同理，我们在shadow dom内部定义了它自己的样式(外部的样式被删除了)，对外部元素的样式没有影响：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    p &#123;</span></span><br><span class="line"><span class="string">      font-size: 20px;</span></span><br><span class="line"><span class="string">      color: blue;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name="slot1"&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
-<p><img src="../images/1540288249870.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540288249870.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>但是，shadow dom的样式还是受继承属性的影响，比如我们在body上面定义了一些继承属性，如<code>font-size</code>等，shadow dom也受这个影响:</p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">body</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">20px</span>;</span><br><span class="line">  <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="../images/1540288701927.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540288701927.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>特别地，shadow dom的样式从shadow host继承，受host元素样式的影响，把上面的body换成div同样成立</p>
 <h2 id="从shadow-dom内部控制host的样式"><a href="#从shadow-dom内部控制host的样式" class="headerlink" title="从shadow dom内部控制host的样式"></a>从shadow dom内部控制host的样式</h2><p>我们可以在shadow dom内部利用下面三个selector选中其所在的host元素：</p>
 <ul>
@@ -279,12 +351,24 @@
 <p>利用这些选择器，我们可以在shadow dom内部控制host的样式，如：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    :host &#123;</span></span><br><span class="line"><span class="string">      color: red;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    p &#123;</span></span><br><span class="line"><span class="string">      color: blue;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name="slot1"&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
 <p>结果如下：</p>
-<p><img src="../images/1540298214495.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540298214495.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>我们在host元素(即这里的div)上设置了<code>color: red</code>，所以light dom中的p元素都是红色；在shadow dom内部还重新定义了p的样式：<code>color: blue</code>，覆盖了从host元素继承的样式，所以shadow dom内部的p是蓝色。</p>
 <h2 id="从shadow-dom内部控制light-dom的样式"><a href="#从shadow-dom内部控制light-dom的样式" class="headerlink" title="从shadow dom内部控制light dom的样式"></a>从shadow dom内部控制light dom的样式</h2><p>从上一节可以看到，light dom样式完全不受shadow dom内部样式影响，我们可以想象成<em>light dom以外部样式渲染好了之后再插入到shadow dom的slot处</em>。浏览器提供了一种机制：在light dom中的元素插入到slot处时，可以继续对它(已经使用外部样式渲染好了)追加一些样式：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.innerHTML = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    :host &#123;</span></span><br><span class="line"><span class="string">      color: red;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    ::slotted(p) &#123;</span></span><br><span class="line"><span class="string">      font-size: 30px;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name="slot1"&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
 <p>这使得light dom中的p元素的font-size变成30px：</p>
-<p><img src="../images/1540299236892.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540299236892.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p><code>::slotted(selector)</code>只能作用于顶层元素，例如这里只能选择p元素，而不能选择p元素的子元素(如果有的话)</p>
 <h2 id="外部host样式优先"><a href="#外部host样式优先" class="headerlink" title="外部host样式优先"></a>外部host样式优先</h2><p>对于host元素，我们既可以在外部也可以在内部添加样式，当发生冲突时，外部的样式优先</p>
 <h1 id="使用shadow-dom来填充custom-element"><a href="#使用shadow-dom来填充custom-element" class="headerlink" title="使用shadow dom来填充custom element"></a>使用shadow dom来填充custom element</h1><p>前面一直以普通的div元素来讲解shadow dom的机制，其实它的最佳拍档是custom element，一般来说，我们是在自定义元素的constructor中进行填充：</p>
@@ -307,8 +391,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/web-component-shadow-dom/" target="_blank" rel="external">http://tomwang1013.github.io/web-component-shadow-dom/</a>
-        
     </div>
     
     <footer>
@@ -320,10 +402,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -428,32 +506,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -541,7 +593,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>

@@ -63,7 +63,7 @@
         </a>
         <hgroup class="introduce">
           <h5 class="nickname">wang xiantong</h5>
-          <a href="mailto:634206017@qq.com" title="634206017@qq.com" class="mail">634206017@qq.com</a>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
         </hgroup>
       </div>
     </div>
@@ -99,23 +99,23 @@
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="https://github.com/yscoder" target="_blank" >
+              <a href="https://github.com/tomwang1013" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="http://www.weibo.com/ysweb" target="_blank" >
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
                 <i class="icon icon-lg icon-weibo"></i>
                 Weibo
               </a>
             </li>
         
             <li class="waves-block waves-effect">
-              <a href="/custom"  >
+              <a href="/about"  >
                 <i class="icon icon-lg icon-link"></i>
-                测试
+                关于
               </a>
             </li>
         
@@ -213,7 +213,13 @@
 </li>
 </ul>
 <p>这是比较常见的两种，还有一种，就是今天我们要介绍的：<code>cache then network</code>，什么意思呢？就是同时发请求及查询缓存，如果缓存中有数据的话先用缓存的数据；当请求返回数据后再用返回的数据覆盖。这种方式适合内容更新比较频繁的请求，先让用户尽快看到内容，然后看到最新的内容</p>
-<p><img src="../images/1542333273980.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542333273980.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>代码实现如下：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// client.js</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> networkDataReceived = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">startSpinner();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. fetch fresh data</span></span><br><span class="line"><span class="keyword">var</span> networkUpdate = fetch(<span class="string">'/data.json'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> response.json();</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">  networkDataReceived = <span class="literal">true</span>;</span><br><span class="line">  updatePage(data);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. fetch cached data</span></span><br><span class="line">caches.match(<span class="string">'/data.json'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!response) <span class="keyword">throw</span> <span class="built_in">Error</span>(<span class="string">"No data"</span>);</span><br><span class="line">  <span class="keyword">return</span> response.json();</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// don't overwrite newer network data</span></span><br><span class="line">  <span class="keyword">if</span> (!networkDataReceived) &#123;</span><br><span class="line">    updatePage(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;).catch(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// we didn't get cached data, the network is our last hope:</span></span><br><span class="line">  <span class="keyword">return</span> networkUpdate;</span><br><span class="line">&#125;).catch(showErrorMessage).then(stopSpinner());</span><br></pre></td></tr></table></figure>
 <p>一般来说缓存中的数据先被取出来展示，网络请求完成后再用最新的数据刷新页面。</p>
@@ -221,7 +227,13 @@
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sw.js</span></span><br><span class="line">self.addEventListener(<span class="string">'fetch'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">  event.respondWith(</span><br><span class="line">    caches.open(<span class="string">'mysite-dynamic'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">cache</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> fetch(event.request).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">        cache.put(event.request, response.clone());</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p>大概就这样了，这种模式可能不太常用，但是碰到特殊场景时还是不错的</p>
 <h1 id="和Stale-while-revalidate的区别"><a href="#和Stale-while-revalidate的区别" class="headerlink" title="和Stale-while-revalidate的区别"></a>和Stale-while-revalidate的区别</h1><p><code>stale-while-revalidate</code>是另外一种模式：还是从缓存中取，取完之后再在后台发起一个请求得到最新的数据来刷新缓存，这样可以保持缓存的数据是比较新的(虽然不是最新的)。在这种模式下，客户端不用直接读缓存，一切逻辑都在sw里面：</p>
-<p><img src="../images/1542333368951.png" alt=""></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542333368951.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
 <p>sw的实现如下：</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">self.addEventListener(<span class="string">'fetch'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">  event.respondWith(</span><br><span class="line">    caches.open(<span class="string">'mysite-dynamic'</span>).then(<span class="function"><span class="keyword">function</span>(<span class="params">cache</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> cache.match(event.request).then(<span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 得到缓存之后发起一个后台请求去拿最新的数据</span></span><br><span class="line">        <span class="keyword">var</span> fetchPromise = fetch(event.request).then(<span class="function"><span class="keyword">function</span>(<span class="params">networkResponse</span>) </span>&#123;</span><br><span class="line">          cache.put(event.request, networkResponse.clone());</span><br><span class="line">          <span class="keyword">return</span> networkResponse;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="keyword">return</span> response || fetchPromise;</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
@@ -237,8 +249,6 @@
 
 
         
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/pwa-cache-then-network/" target="_blank" rel="external">http://tomwang1013.github.io/pwa-cache-then-network/</a>
-        
     </div>
     
     <footer>
@@ -250,10 +260,6 @@
 </blockquote>
 
         
-<div class="page-reward">
-    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
-</div>
-
 
 
         <div class="post-footer">
@@ -358,32 +364,6 @@
 
 </article>
 
-<div id="reward" class="page-modal reward-lay">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <h3 class="reward-title">
-        <i class="icon icon-quote-left"></i>
-        谢谢大爷~
-        <i class="icon icon-quote-right"></i>
-    </h3>
-    <div class="reward-content">
-        
-        <div class="reward-code">
-            <img id="rewardCode" src="/img/wechat.jpg" alt="打赏二维码">
-        </div>
-        
-        <label class="reward-toggle">
-            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
-                data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
-            <div class="reward-toggle-ctrol">
-                <span class="reward-toggle-item wechat">微信</span>
-                <span class="reward-toggle-label"></span>
-                <span class="reward-toggle-item alipay">支付宝</span>
-            </div>
-        </label>
-        
-    </div>
-</div>
-
 
 
 </div>
@@ -471,7 +451,7 @@
 
     <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
 <script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
 
 
 </script>
