@@ -166,6 +166,54 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
+            <article id="post-pwa-clients-claim-vs-self-skipWaiting"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018-10-25 17:20:09" datetime="2018-10-25T09:20:09.000Z"  itemprop="datePublished">2018-10-25</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/pwa-clients-claim-vs-self-skipWaiting/">service worker之clients.claim() vs self.skipWaiting()</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        service worker中有两个api出镜率很高：一个是clients.claim(), 另一个是self.skipWaiting()，我们分别看看它们的应用场景：
+clients.claim当页面第一次注册sw的时候，我们注意到即使此页面及其子页面处于sw的控制范围之内，但是由此页面发出的任务请求都没有经过sw，换句话说，sw在页面第一次打开的时候并没有生效。这是一个正常行为，原因如下...
+    
+
+        <a href="/pwa-clients-claim-vs-self-skipWaiting/" class="post-more waves-effect waves-button">
+            阅读全文…
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/html5/">html5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwa/">pwa</a></li></ul>
+
+    </div>
+    
+</article>
+
+        </li>
+    
+        <li class="post-list-item fade">
             <article id="post-web-component-shadow-dom"
   class="article-card article-type-post" itemprop="blogPost">
 
@@ -652,54 +700,6 @@ Vendor splitting将第三方代码(vendor code)和应用程序的代码分开来
     <div class="post-footer">
         
 	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/">performance</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/">webpack</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-crp"
-  class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-08-22 12:49:24" datetime="2018-08-22T04:49:24.000Z"  itemprop="datePublished">2018-08-22</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/crp/">深入理解浏览器关键渲染路径(critical render path)及其优化</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        web性能分析通常都是基本理论+反复实践，没有一套统一的标准或方法。以我的经验来看，我们或多或少都知道一些或几点相关理论，但都是很片段很零碎的，不太好总结或关联起来。本文尝试在critical render path(后简称crp)上做一个分析总结。
-什么是crp？crp是和浏览器首屏渲染有关的，指的是浏览器在渲染首屏之前需要经过哪些关键步骤。我们知道，首屏渲染速度是性能的一个重要指标，我们...
-    
-
-        <a href="/crp/" class="post-more waves-effect waves-button">
-            阅读全文…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/">performance</a></li></ul>
 
     </div>
     
