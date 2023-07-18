@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>深入理解浏览器关键渲染路径(critical render path)及其优化 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="performance">
+    <meta name="description" content="web性能分析通常都是基本理论+反复实践，没有一套统一的标准或方法。以我的经验来看，我们或多或少都知道一些或几点相关理论，但都是很片段很零碎的，不太好总结或关联起来。本文尝试在critical render path(后简称crp)上做一个分析总结。 什么是crp？crp是和浏览器首屏渲染有关的，指的是浏览器在渲染首屏之前需要经过哪些关键步骤。我们知道，首屏渲染速度是性能的一个重要指标，我们应该让">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解浏览器关键渲染路径(critical render path)及其优化">
+<meta property="og:url" content="http://tomwang1013.github.io/crp/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="web性能分析通常都是基本理论+反复实践，没有一套统一的标准或方法。以我的经验来看，我们或多或少都知道一些或几点相关理论，但都是很片段很零碎的，不太好总结或关联起来。本文尝试在critical render path(后简称crp)上做一个分析总结。 什么是crp？crp是和浏览器首屏渲染有关的，指的是浏览器在渲染首屏之前需要经过哪些关键步骤。我们知道，首屏渲染速度是性能的一个重要指标，我们应该让">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537495003079.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537495651317.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537495994924.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537498465699.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537505638482.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537520189100.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537520778480.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537520878367.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537520964513.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537520994931.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1537521049196.png">
+<meta property="article:published_time" content="2018-08-22T04:49:24.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.560Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="performance">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1537495003079.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">深入理解浏览器关键渲染路径(critical render path)及其优化</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">深入理解浏览器关键渲染路径(critical render path)及其优化</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-08-22T04:49:24.000Z" itemprop="datePublished" class="page-time">
+  2018-08-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFcrp%EF%BC%9F"><span class="post-toc-number">1.</span> <span class="post-toc-text">什么是crp？</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%A1%B5%E9%9D%A2%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B"><span class="post-toc-number">2.</span> <span class="post-toc-text">页面渲染流程</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#css%E7%9A%84render-blocking%E7%89%B9%E6%80%A7"><span class="post-toc-number">3.</span> <span class="post-toc-text">css的render blocking特性</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#javascript%E7%99%BB%E5%9C%BA"><span class="post-toc-number">4.</span> <span class="post-toc-text">javascript登场</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E8%AF%B4%E8%AF%B4defer%E5%92%8Casync"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">说说defer和async</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#%E4%BD%BF%E7%94%A8chrome-devtool%E4%B8%AD%E7%9A%84Audits%E6%9F%A5%E7%9C%8B%E9%A1%B5%E9%9D%A2crp"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">使用chrome devtool中的Audits查看页面crp</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%80%BB%E7%BB%93"><span class="post-toc-number">5.</span> <span class="post-toc-text">总结</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-crp"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">深入理解浏览器关键渲染路径(critical render path)及其优化</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-08-22 12:49:24" datetime="2018-08-22T04:49:24.000Z"  itemprop="datePublished">2018-08-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>web性能分析通常都是基本理论+反复实践，没有一套统一的标准或方法。以我的经验来看，我们或多或少都知道一些或几点相关理论，但都是很片段很零碎的，不太好总结或关联起来。本文尝试在<code>critical render path</code>(后简称crp)上做一个分析总结。</p>
+<h3 id="什么是crp？"><a href="#什么是crp？" class="headerlink" title="什么是crp？"></a>什么是crp？</h3><p>crp是和浏览器首屏渲染有关的，指的是浏览器在渲染首屏之前需要经过哪些关键步骤。我们知道，首屏渲染速度是性能的一个重要指标，我们应该让用户在打开页面后尽快看到东西出来。要做到这一点，需要深入分析并优化crp，让这些关键步骤所花时间最小。第一步，我们先看看浏览器是如何渲染页面的</p>
+<h3 id="页面渲染流程"><a href="#页面渲染流程" class="headerlink" title="页面渲染流程"></a>页面渲染流程</h3><p>这算是一个基本理论，每个浏览器渲染页面都要经过一个基本相同的过程：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537495003079.png" alt="1537495003079" title="">
+                </div>
+                <div class="image-caption">1537495003079</div>
+            </figure>
+
+<ol>
+<li>解析html构建DOM</li>
+<li>解析css构建CSSOM（和第一步同时进行）</li>
+<li>将DOM和CSSOM合起来构建渲染树</li>
+<li>根据渲染树，计算每个元素在窗口中的确切位置和大小</li>
+<li>执行渲染</li>
+</ol>
+<p>我们以一个例子来详细说明这几个步骤，考虑下面一段html：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width,initial-scale=1&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">href</span>=<span class="string">&quot;style.css&quot;</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Critical Path<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Hello <span class="tag">&lt;<span class="name">span</span>&gt;</span>web performance<span class="tag">&lt;/<span class="name">span</span>&gt;</span> students!<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;awesome-photo.jpg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>第一步解析html，生成DOM：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537495651317.png" alt="1537495651317" title="">
+                </div>
+                <div class="image-caption">1537495651317</div>
+            </figure>
+
+<p>第二步解析css，生成CSSOM：</p>
+<p>DOM告诉了我们页面的结构，但是没有样式信息，所以下一步就是解析css，也会生成一个树状结构，这是因为css具有继承特性，子元素或默认继承父元素的一些样式，我们假设页面中的css如下(可以inline或从外部文件导入)：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">body</span> &#123; <span class="attribute">font-size</span>: <span class="number">16px</span> &#125;</span><br><span class="line"><span class="selector-tag">p</span> &#123; <span class="attribute">font-weight</span>: bold &#125;</span><br><span class="line"><span class="selector-tag">span</span> &#123; <span class="attribute">color</span>: red &#125;</span><br><span class="line"><span class="selector-tag">p</span> <span class="selector-tag">span</span> &#123; <span class="attribute">display</span>: none &#125;</span><br><span class="line"><span class="selector-tag">img</span> &#123; <span class="attribute">float</span>: right &#125;</span><br></pre></td></tr></table></figure>
+
+<p>生成的CSSOM树如下：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537495994924.png" alt="1537495994924" title="">
+                </div>
+                <div class="image-caption">1537495994924</div>
+            </figure>
+
+<p>灰色的<code>font-size</code>表示这是一个继承属性。这里需要注意的是，CSSOM树中只包含了我们显式设置样式的元素，因为浏览器还有自己的默认样式</p>
+<p>第三步把DOM和CSSOM结合在一起，生成渲染树(render tree)：</p>
+<p>渲染树包含所有<strong>可见</strong>的元素及其显式设置的**最终样式(computed style)**，所以head和p元素下面的span不会出现在渲染树中：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537498465699.png" alt="1537498465699" title="">
+                </div>
+                <div class="image-caption">1537498465699</div>
+            </figure>
+
+<p><span style="color: #999999;font-size:12px">注：图中的渲染树应该少了一个body的植树span元素</span></p>
+<p>第四步计算所有元素在视窗(viewport)中的位置和大小：</p>
+<p>在最终渲染之前需要计算每个元素的位置和大小，即它的<code>box model</code>，所有的尺寸css属性都要转为为像素，这一步也叫<em>回流(reflow)</em></p>
+<p>最后一步就是渲染(pixel to screen)了，我们知道了元素的可见性及最终样式、大小、尺寸，剩下的事就是将它们画在屏幕上</p>
+<p>这就是整个渲染过程，优化crp就是要尽量减少这5步所花的时间，让内容尽快呈现在用户面前。</p>
+<h3 id="css的render-blocking特性"><a href="#css的render-blocking特性" class="headerlink" title="css的render blocking特性"></a>css的render blocking特性</h3><p>从上面我们可以看到，只有html和css都解析完了，我们才能构建渲染树，它们都是<em>渲染阻塞</em>(render blocking)的。html不用说了，没有它我们的页面从何而来，我们来说下css。如果没有样式，使用系统默认的样式，页面是很难看且基本不可用的。如果浏览器解析完DOM就直接渲染，等后面css再解析完了再渲染，就会出现页面的闪动问题：”Flash of Unstyled Content” (FOUC)，所以我们必须尽快构建CSSOM。因为CSSOM与DOM的构建是并行的，所以一般将css放在head里面，让它尽快开始构建，这样能将渲染树的构建尽量提前。</p>
+<h3 id="javascript登场"><a href="#javascript登场" class="headerlink" title="javascript登场"></a>javascript登场</h3><p>页面当然少不了js，关于js的故事也最多。当页面引入js后，问题变复杂了，因为js太强大了：既能修改DOM有能修改CSSOM，还有人人闻之变色敬而远之的<code>document.write</code>，所以大家都听到一个故事了：浏览器在parse html过程中只要一遇到js，就要停止parse，直接此js加载并运行完成，这就是<strong>html block on js</strong>。其实这个故事只讲了一半，另一半是<strong>js block on css</strong>：如果当前有css还没有下载或解析完，js必须等待它们完成后才能执行！</p>
+<p>前面说过，DOM和CSSOM是并行独立解析的，现在因为js的加入，它们之间发生了关联：DOM解析因js而阻塞，而js又因CSSOM而阻塞：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1537505638482.png" alt="1537505638482" title="">
+                </div>
+                <div class="image-caption">1537505638482</div>
+            </figure>
+
+<p>这也解释了为什么**css在上，js在下(Stylesheets at the top, scripts at the bottom)**：js放在body的末尾，这样就不会对DOM和CSSOM的构建进行干扰，让它们并行尽快完成；放在下面还有一个好处就是不通过<code>document.ready</code>事件也能直接引用所有DOM元素。</p>
+<h4 id="说说defer和async"><a href="#说说defer和async" class="headerlink" title="说说defer和async"></a>说说defer和async</h4><p>前面说的html block on js中的js值的是<em>sync js</em>，js可以加上defer或async属性，大家应该都听说过，这里我们详细比较下这2个属性，首先它们有一个共同点：<strong>不会阻塞html的解析</strong>，不同点如下：</p>
+<ul>
+<li>defer js的执行在DOM和<strong>CSSOM</strong>全部构建完之后立即<em>按顺序执行</em>，而async js在加载完后马上执行，但是不保证执行顺序</li>
+<li>DOMContentLoaded(DCL)在defer js执行完后再触发，而async js的执行和DCL触发时机无关。使用async js的话，DCL一般在DOM构建完后马上触发</li>
+</ul>
+<p>由此可见，如果不考虑js执行顺序，应该优先使用async js</p>
+<h4 id="使用chrome-devtool中的Audits查看页面crp"><a href="#使用chrome-devtool中的Audits查看页面crp" class="headerlink" title="使用chrome devtool中的Audits查看页面crp"></a>使用chrome devtool中的Audits查看页面crp</h4><p>我们分别使用sync js，defer js，async js来测试下网页的渲染过程，特别是crp，页面如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width,initial-scale=1&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>crp test - async<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;style.css&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> <span class="attr">onload</span>=<span class="string">&quot;measureCRP()&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>Hello <span class="tag">&lt;<span class="name">span</span>&gt;</span>web performance<span class="tag">&lt;/<span class="name">span</span>&gt;</span> students!<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span>&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;awesome-photo.jpg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">  <span class="comment">&lt;!-- 分别使用defer，async测试 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;timing.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><a href="../labs/crp/crp-test-sync.html">sync js(默认行为)</a>：</p>
+<p><img src="/../images/1537520189100.png" alt="1537520189100"></p>
+<p>可以看到js在crp中，且html经过了2次parse，中间被sync js阻塞了：</p>
+<p><img src="/../images/1537520778480.png" alt="1537520778480"></p>
+<p>DCL(蓝线)也在js之后触发</p>
+</li>
+<li><p><a href="../labs/crp/crp-test-defer.html">defer js</a></p>
+<p><img src="/../images/1537520878367.png" alt="1537520878367"></p>
+<p>js不在crp中，但是DCL依然在js之后触发：</p>
+<p><img src="/../images/1537520964513.png" alt="1537520964513"></p>
+</li>
+<li><p><a href="../labs/crp/crp-test-async.html">async js</a></p>
+<p><img src="/../images/1537520994931.png" alt="1537520994931"></p>
+<p>js不在crp中，和预想的一样，且DCL也在js执行之前触发：</p>
+<p><img src="/../images/1537521049196.png" alt="1537521049196"></p>
+<p>DCL在html parse完之后马上触发了</p>
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>想要提高页面加载和渲染速度，让用户尽快看到内容并交互，必须尽量减少crp的总体时间，控制crp中的资源数量</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://developers.google.com/web/fundamentals/performance/critical-rendering-path/">https://developers.google.com/web/fundamentals/performance/critical-rendering-path/</a></p>
+<p><a target="_blank" rel="noopener" href="https://calendar.perfplanet.com/2012/deciphering-the-critical-rendering-path/">https://calendar.perfplanet.com/2012/deciphering-the-critical-rendering-path/</a></p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.560Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/performance/" rel="tag">performance</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/crp/&title=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/crp/&title=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/crp/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/crp/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/crp/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/code-splitting/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">javascript优化之code splitting</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/rendering/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">浏览器渲染性能分析总结</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/crp/&title=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/crp/&title=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/crp/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《深入理解浏览器关键渲染路径(critical render path)及其优化》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/crp/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/crp/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/crp/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

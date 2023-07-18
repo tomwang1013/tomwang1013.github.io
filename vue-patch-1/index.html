@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>vue patch算法解读之一：根组件的初始化 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="vue,read-source-code">
+    <meta name="description" content="vue的渲染过程是由vnode驱动的，当数据发生变化时，根据前后vnode的差异使用patch算法只重新渲染变化的部分。这里说的渲染其实就是重新调整组件的DOM结构：复用、移动、删除dom节点使得真实dom和vdom保持一致。这个过程其实是很复杂的，这里我尝试一边读源码调试，一边记录对这个过程的理解，在完全理解之前，这里记录的都是一些片段，希望最后能将这些片段串联起来组成一篇真正的有条理的解读 根">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue patch算法解读之一：根组件的初始化">
+<meta property="og:url" content="http://tomwang1013.github.io/vue-patch-1/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="vue的渲染过程是由vnode驱动的，当数据发生变化时，根据前后vnode的差异使用patch算法只重新渲染变化的部分。这里说的渲染其实就是重新调整组件的DOM结构：复用、移动、删除dom节点使得真实dom和vdom保持一致。这个过程其实是很复杂的，这里我尝试一边读源码调试，一边记录对这个过程的理解，在完全理解之前，这里记录的都是一些片段，希望最后能将这些片段串联起来组成一篇真正的有条理的解读 根">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1541864549578.png">
+<meta property="article:published_time" content="2018-11-10T15:52:03.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.568Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="read-source-code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1541864549578.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">vue patch算法解读之一：根组件的初始化</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">vue patch算法解读之一：根组件的初始化</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-11-10T15:52:03.000Z" itemprop="datePublished" class="page-time">
+  2018-11-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%A0%B9%E7%BB%84%E4%BB%B6%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="post-toc-number">1.</span> <span class="post-toc-text">根组件的初始化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#render"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">_render</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#update"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">_update</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-vue-patch-1"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">vue patch算法解读之一：根组件的初始化</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-11-10 23:52:03" datetime="2018-11-10T15:52:03.000Z"  itemprop="datePublished">2018-11-10</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>vue的渲染过程是由vnode驱动的，当数据发生变化时，根据前后vnode的差异使用patch算法只重新渲染变化的部分。这里说的渲染其实就是重新调整组件的DOM结构：复用、移动、删除dom节点使得真实dom和vdom保持一致。这个过程其实是很复杂的，这里我尝试一边读源码调试，一边记录对这个过程的理解，在完全理解之前，这里记录的都是一些片段，希望最后能将这些片段串联起来组成一篇真正的有条理的解读</p>
+<h1 id="根组件的初始化"><a href="#根组件的初始化" class="headerlink" title="根组件的初始化"></a>根组件的初始化</h1><p>我们以一个简单的例子开始：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">App</span> <span class="keyword">from</span> <span class="string">&#x27;./App.vue&#x27;</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Vue</span>(&#123;</span><br><span class="line">  <span class="attr">render</span>: <span class="function"><span class="params">h</span> =&gt;</span> <span class="title function_">h</span>(<span class="title class_">App</span>),</span><br><span class="line">&#125;).$mount(<span class="string">&#x27;#app&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// app.vue</span><br><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;img alt=&quot;Vue logo&quot; src=&quot;./assets/logo.png&quot;&gt;</span><br><span class="line">    &lt;div&gt;hello, world!&lt;/div&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">export default &#123;</span><br><span class="line">  name: &#x27;app&#x27;,</span><br><span class="line">&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// index.html</span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们把最顶层组件(new Vue出来的)称为root，程序的运行以root的渲染开始。vue实例的渲染分两步：第一步是render，得到代表它的结构的vnode；第二部根据vnode，渲染出真实的dom。整个渲染过程为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/lifecycle.js</span></span><br><span class="line">updateComponent = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  vm.<span class="title function_">_update</span>(vm.<span class="title function_">_render</span>(), hydrating)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="render"><a href="#render" class="headerlink" title="_render"></a>_render</h2><p><code>_render</code>会调用vm的<code>render</code>函数，root的render函数很简单：<code>h =&gt; h(App)</code>。这里的h其实就是实例方法<code>vm.$createElement</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/render.js</span></span><br><span class="line"><span class="comment">// normalization is always applied for the public version, used in</span></span><br><span class="line"><span class="comment">// user-written render functions.</span></span><br><span class="line">vm.<span class="property">$createElement</span> = <span class="function">(<span class="params">a, b, c, d</span>) =&gt;</span> <span class="title function_">createElement</span>(vm, a, b, c, d, <span class="literal">true</span>)</span><br></pre></td></tr></table></figure>
+
+<p>App就是import <code>App.vue</code>得到的一个表示组件的对象</p>
+<p><code>createElement</code>这个函数返回一个vnode：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-element.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createElement</span> (</span><br><span class="line">  <span class="attr">context</span>: <span class="title class_">Component</span>,</span><br><span class="line">  <span class="attr">tag</span>: any,</span><br><span class="line">  <span class="attr">data</span>: any,</span><br><span class="line">  <span class="attr">children</span>: any,</span><br><span class="line">  <span class="attr">normalizationType</span>: any,</span><br><span class="line">  <span class="attr">alwaysNormalize</span>: boolean</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">_createElement</span>(context, tag, data, children, normalizationType)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>只是简单包装了一下，最终调用的是<code>_createElement</code>，这个函数很复杂，我们截出骨干部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-element.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">_createElement</span> (</span><br><span class="line">  <span class="attr">context</span>: <span class="title class_">Component</span>,</span><br><span class="line">  tag?: string | <span class="title class_">Class</span>&lt;<span class="title class_">Component</span>&gt; | <span class="title class_">Function</span> | <span class="title class_">Object</span>,</span><br><span class="line">  data?: <span class="title class_">VNodeData</span>,</span><br><span class="line">  children?: any,</span><br><span class="line">  normalizationType?: number</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">let</span> vnode, ns</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> tag === <span class="string">&#x27;string&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="title class_">Ctor</span></span><br><span class="line">    ns = (context.<span class="property">$vnode</span> &amp;&amp; context.<span class="property">$vnode</span>.<span class="property">ns</span>) || config.<span class="title function_">getTagNamespace</span>(tag)</span><br><span class="line">    <span class="keyword">if</span> (config.<span class="title function_">isReservedTag</span>(tag)) &#123;</span><br><span class="line">      <span class="comment">// platform built-in elements</span></span><br><span class="line">      vnode = <span class="keyword">new</span> <span class="title class_">VNode</span>(</span><br><span class="line">        config.<span class="title function_">parsePlatformTagName</span>(tag), data, children,</span><br><span class="line">        <span class="literal">undefined</span>, <span class="literal">undefined</span>, context</span><br><span class="line">      )</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((!data || !data.<span class="property">pre</span>) &amp;&amp; <span class="title function_">isDef</span>(<span class="title class_">Ctor</span> = <span class="title function_">resolveAsset</span>(context.<span class="property">$options</span>, <span class="string">&#x27;components&#x27;</span>, tag))) &#123;</span><br><span class="line">      <span class="comment">// component</span></span><br><span class="line">      vnode = <span class="title function_">createComponent</span>(<span class="title class_">Ctor</span>, data, context, children, tag)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// direct component options / constructor</span></span><br><span class="line">    vnode = <span class="title function_">createComponent</span>(tag, data, context, children)</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> vnode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看看这个函数的参数：</p>
+<ul>
+<li>context：表示当前的vue实例，因为所有的方法最开始都是由某个vue实例调用方法引起的，就这里来说是调用<code>$createElement</code>引起的</li>
+<li>tag：表示这个vnode的类型，它可以是以下几种类型：<ul>
+<li>html内置的标签名，如”div”</li>
+<li>vue组件名称，如<code>&lt;cmpName&gt;&lt;/cmpName&gt;</code>中的”cmpName”</li>
+<li>代表vue组件的对象，如这里的App，是从app.vue import进来的</li>
+<li>代表vue组件的构造函数，本质上和对象是一致的</li>
+</ul>
+</li>
+<li>data：vnode的数据，如各种属性</li>
+<li>children：子元素</li>
+<li>normalizationType：暂时不管</li>
+</ul>
+<p>就我们这个例子来说，<code>App</code>是一个对象，所以走的是下面这句代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// direct component options / constructor</span></span><br><span class="line">vnode = <span class="title function_">createComponent</span>(tag, data, context, children)</span><br></pre></td></tr></table></figure>
+
+<p>由函数<code>createComponent</code>返回vnode，这个函数也比较复杂，我们看看关键部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-component.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createComponent</span> (</span><br><span class="line">  <span class="title class_">Ctor</span>: <span class="title class_">Class</span>&lt;<span class="title class_">Component</span>&gt; | <span class="title class_">Function</span> | <span class="title class_">Object</span> | <span class="keyword">void</span>,</span><br><span class="line">  <span class="attr">data</span>: ?<span class="title class_">VNodeData</span>,</span><br><span class="line">  <span class="attr">context</span>: <span class="title class_">Component</span>,</span><br><span class="line">  <span class="attr">children</span>: ?<span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt;,</span><br><span class="line">  tag?: string</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; | <span class="keyword">void</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> baseCtor = context.<span class="property">$options</span>.<span class="property">_base</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// plain options object: turn it into a constructor</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isObject</span>(<span class="title class_">Ctor</span>)) &#123;</span><br><span class="line">    <span class="title class_">Ctor</span> = baseCtor.<span class="title function_">extend</span>(<span class="title class_">Ctor</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  data = data || &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// extract props</span></span><br><span class="line">  <span class="keyword">const</span> propsData = <span class="title function_">extractPropsFromVNodeData</span>(data, <span class="title class_">Ctor</span>, tag)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// install component management hooks onto the placeholder node</span></span><br><span class="line">  <span class="title function_">installComponentHooks</span>(data)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// return a placeholder vnode</span></span><br><span class="line">  <span class="keyword">const</span> name = <span class="title class_">Ctor</span>.<span class="property">options</span>.<span class="property">name</span> || tag</span><br><span class="line">  <span class="keyword">const</span> vnode = <span class="keyword">new</span> <span class="title class_">VNode</span>(</span><br><span class="line">    <span class="string">`vue-component-<span class="subst">$&#123;Ctor.cid&#125;</span><span class="subst">$&#123;name ? <span class="string">`-<span class="subst">$&#123;name&#125;</span>`</span> : <span class="string">&#x27;&#x27;</span>&#125;</span>`</span>,</span><br><span class="line">    data, <span class="literal">undefined</span>, <span class="literal">undefined</span>, <span class="literal">undefined</span>, context,</span><br><span class="line">    &#123; <span class="title class_">Ctor</span>, propsData, listeners, tag, children &#125;,</span><br><span class="line">    asyncFactory</span><br><span class="line">  )</span><br><span class="line">	<span class="keyword">return</span> vnode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数主要就是根据App这个组件来构造一个vnode出来，它首先做了一件最关键的事：创建组件的构造函数。我们知道，所有的组件实例最终都是通过某个构造函数new出来的：<code>new Ctor(options)</code>，这个Ctor可以是Vue这个顶层内置构造函数，也可以是从Vue继承下来的组件构造函数。</p>
+<p>这里的<code>baseCtor</code>就是<code>Vue</code>，<code>Ctor</code>就是<code>App</code>这个对象，我们通过<code>Vue.extend</code>函数将App对象转化为构造函数：<code>Ctor = baseCtor.extend(Ctor)</code>，extend函数构建原型链并返回创建的构造函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/global-api/extend.js</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property">extend</span> = <span class="keyword">function</span> (<span class="params">extendOptions: <span class="built_in">Object</span></span>): <span class="title class_">Function</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="title class_">Super</span> = <span class="variable language_">this</span></span><br><span class="line">  extendOptions = extendOptions || &#123;&#125;</span><br><span class="line">  <span class="keyword">const</span> <span class="title class_">Sub</span> = <span class="keyword">function</span> <span class="title function_">VueComponent</span> (options) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">_init</span>(options)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title class_">Sub</span>.<span class="property"><span class="keyword">prototype</span></span> = <span class="title class_">Object</span>.<span class="title function_">create</span>(<span class="title class_">Super</span>.<span class="property"><span class="keyword">prototype</span></span>)</span><br><span class="line">  <span class="title class_">Sub</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">constructor</span> = <span class="title class_">Sub</span></span><br><span class="line">  <span class="title class_">Sub</span>.<span class="property">cid</span> = cid++</span><br><span class="line">  <span class="title class_">Sub</span>.<span class="property">options</span> = <span class="title function_">mergeOptions</span>(</span><br><span class="line">    <span class="title class_">Super</span>.<span class="property">options</span>,</span><br><span class="line">    extendOptions</span><br><span class="line">  )</span><br><span class="line">  <span class="title class_">Sub</span>[<span class="string">&#x27;super&#x27;</span>] = <span class="title class_">Super</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> <span class="title class_">Sub</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里特别要注意的是构造函数的<code>options</code>属性，它是由自己的属性和父类的属性合并而成的。在通过构造函数new一个vue实例的时候，我们还会传另一个options对象进来，这个对象和构造函数本身的options一起构成vue实例最终的<code>$options</code>属性值。</p>
+<p>我们继续回到createComponent函数，得到构造函数之后我们提取<code>propsData</code>，即传给组件的props的数据；然后调用<code>installComponentHooks</code>在data上面增加一个hook属性，属性里面包含四个函数，它们将会在patch过程中分别在不同的时机被调用到：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">data.<span class="property">hook</span> = &#123;</span><br><span class="line">  <span class="title function_">init</span>(<span class="params"></span>) &#123;&#125;,</span><br><span class="line">  <span class="title function_">prepatch</span>(<span class="params"></span>) &#123;&#125;,</span><br><span class="line">  <span class="title function_">insert</span>(<span class="params"></span>) &#123;&#125;,</span><br><span class="line">  <span class="title function_">destroy</span>(<span class="params"></span>) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们后面会讲到其中的init，其他的先不管。最后就是vnode的创建了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> vnode = <span class="keyword">new</span> <span class="title class_">VNode</span>(</span><br><span class="line">  <span class="string">`vue-component-<span class="subst">$&#123;Ctor.cid&#125;</span><span class="subst">$&#123;name ? <span class="string">`-<span class="subst">$&#123;name&#125;</span>`</span> : <span class="string">&#x27;&#x27;</span>&#125;</span>`</span>,</span><br><span class="line">  data, <span class="literal">undefined</span>, <span class="literal">undefined</span>, <span class="literal">undefined</span>, context,</span><br><span class="line">  &#123; <span class="title class_">Ctor</span>, propsData, listeners, tag, children &#125;,</span><br><span class="line">  asyncFactory</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>大家可以对照下VNode的构造函数看看：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">constructor</span> (</span><br><span class="line">  tag?: string,</span><br><span class="line">  data?: <span class="title class_">VNodeData</span>,</span><br><span class="line">  children?: ?<span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt;,</span><br><span class="line">  text?: string,</span><br><span class="line">  elm?: <span class="title class_">Node</span>,</span><br><span class="line">  context?: <span class="title class_">Component</span>,</span><br><span class="line">  componentOptions?: <span class="title class_">VNodeComponentOptions</span>,</span><br><span class="line">  asyncFactory?: <span class="title class_">Function</span></span><br><span class="line">) &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，构造函数保存在<code>componentOptions</code>中，并且tag值是类似vue-component-1-app这种字符串。</p>
+<p>这样，root实例的vnode就得到了</p>
+<h2 id="update"><a href="#update" class="headerlink" title="_update"></a>_update</h2><p><code>_render</code>返回vnode之后，<code>_update</code>将vnode转化为真正的DOM：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">_update</span> = <span class="keyword">function</span> (<span class="params">vnode: VNode, hydrating?: boolean</span>) &#123;</span><br><span class="line">   <span class="keyword">const</span> <span class="attr">vm</span>: <span class="title class_">Component</span> = <span class="variable language_">this</span></span><br><span class="line">   <span class="keyword">const</span> prevEl = vm.<span class="property">$el</span></span><br><span class="line">   <span class="keyword">const</span> prevVnode = vm.<span class="property">_vnode</span></span><br><span class="line">   <span class="keyword">const</span> prevActiveInstance = activeInstance</span><br><span class="line">   activeInstance = vm</span><br><span class="line">   vm.<span class="property">_vnode</span> = vnode</span><br><span class="line">   <span class="keyword">if</span> (!prevVnode) &#123;</span><br><span class="line">     <span class="comment">// initial render</span></span><br><span class="line">     vm.<span class="property">$el</span> = vm.<span class="title function_">__patch__</span>(vm.<span class="property">$el</span>, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="comment">// updates</span></span><br><span class="line">     vm.<span class="property">$el</span> = vm.<span class="title function_">__patch__</span>(prevVnode, vnode)</span><br><span class="line">   &#125;</span><br><span class="line">   activeInstance = prevActiveInstance</span><br><span class="line">   ...</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>返回的vnode保存在<code>_vnode</code>中，然后看之前的_vnode是否存在，不存在的话表示第一次渲染，否则只是更新。无论如何都是调用<code>__path__</code>函数，<code>__path__</code>函数定义如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/platforms/web/runtime/index.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; patch &#125; <span class="keyword">from</span> <span class="string">&#x27;./patch&#x27;</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">__patch__</span> = inBrowser ? patch : noop</span><br><span class="line"></span><br><span class="line"><span class="comment">// src/platforms/web/runtime/patch.js</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> nodeOps <span class="keyword">from</span> <span class="string">&#x27;web/runtime/node-ops&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; createPatchFunction &#125; <span class="keyword">from</span> <span class="string">&#x27;core/vdom/patch&#x27;</span></span><br><span class="line"><span class="keyword">import</span> baseModules <span class="keyword">from</span> <span class="string">&#x27;core/vdom/modules/index&#x27;</span></span><br><span class="line"><span class="keyword">import</span> platformModules <span class="keyword">from</span> <span class="string">&#x27;web/runtime/modules/index&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// the directive module should be applied last, after all</span></span><br><span class="line"><span class="comment">// built-in modules have been applied.</span></span><br><span class="line"><span class="keyword">const</span> modules = platformModules.<span class="title function_">concat</span>(baseModules)</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="attr">patch</span>: <span class="title class_">Function</span> = <span class="title function_">createPatchFunction</span>(&#123; nodeOps, modules &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到最终的patch函数是src&#x2F;core&#x2F;vdom&#x2F;patch.js中的<code>createPatchFunction</code>的返回值，整个这个文件就是来生成真正的DOM的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createPatchFunction</span> (backend) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; modules, nodeOps &#125; = backend</span><br><span class="line">  </span><br><span class="line">  <span class="comment">/* 定义了一大堆内部函数 */</span></span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">function</span> <span class="title function_">patch</span> (oldVnode, vnode, hydrating, removeOnly) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们以这个例子看看首次渲染是如何进行的，首次渲染调用如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="property">$el</span> = vm.<span class="title function_">__patch__</span>(vm.<span class="property">$el</span>, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在渲染之前<code>vm.$el</code>的值是html中div#app元素(<code>$mount(&#39;#app&#39;)</code>)，<code>vnode</code>是当前_vnode，hydrating只有在SSR时才是true，其他情况都是false，以这些参数，我们看看patch函数是如何执行的，为简单起见，我们只保留这个例子要执行的代码路径：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js	</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">patch</span> (oldVnode, vnode, hydrating, removeOnly) &#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">isUndef</span>(vnode)) &#123;</span><br><span class="line">     ...</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">let</span> isInitialPatch = <span class="literal">false</span></span><br><span class="line">   <span class="keyword">const</span> insertedVnodeQueue = []</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">isUndef</span>(oldVnode)) &#123;</span><br><span class="line">     ...</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">const</span> isRealElement = <span class="title function_">isDef</span>(oldVnode.<span class="property">nodeType</span>)</span><br><span class="line">     <span class="keyword">if</span> (!isRealElement &amp;&amp; <span class="title function_">sameVnode</span>(oldVnode, vnode)) &#123;</span><br><span class="line">       ...</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="keyword">if</span> (isRealElement) &#123;</span><br><span class="line">         <span class="comment">// mounting to a real element</span></span><br><span class="line">         oldVnode = <span class="title function_">emptyNodeAt</span>(oldVnode)</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">// replacing existing element</span></span><br><span class="line">       <span class="keyword">const</span> oldElm = oldVnode.<span class="property">elm</span></span><br><span class="line">       <span class="keyword">const</span> parentElm = nodeOps.<span class="title function_">parentNode</span>(oldElm)</span><br><span class="line"></span><br><span class="line">       <span class="comment">// create new node</span></span><br><span class="line">       <span class="title function_">createElm</span>(</span><br><span class="line">         vnode,</span><br><span class="line">         insertedVnodeQueue,</span><br><span class="line">         <span class="comment">// extremely rare edge case: do not insert if old element is in a</span></span><br><span class="line">         <span class="comment">// leaving transition. Only happens when combining transition +</span></span><br><span class="line">         <span class="comment">// keep-alive + HOCs. (#4590)</span></span><br><span class="line">         oldElm.<span class="property">_leaveCb</span> ? <span class="literal">null</span> : parentElm,</span><br><span class="line">         nodeOps.<span class="title function_">nextSibling</span>(oldElm)</span><br><span class="line">       )</span><br><span class="line">      </span><br><span class="line">       <span class="comment">// destroy old node</span></span><br><span class="line">       <span class="keyword">if</span> (<span class="title function_">isDef</span>(parentElm)) &#123;</span><br><span class="line">         <span class="title function_">removeVnodes</span>(parentElm, [oldVnode], <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">isDef</span>(oldVnode.<span class="property">tag</span>)) &#123;</span><br><span class="line">         ...</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   ...</span><br><span class="line">   <span class="keyword">return</span> vnode.<span class="property">elm</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为这里的oldVnode是一个dom元素，<code>isRealElement</code>为true，所以会调用<code>createElm</code>来创建vnode对应的根元素并保存在vnode的<code>elm</code>属性中，整个patch函数返回的也是这个根元素。我们来看看createElm的实现，和之前一样，只列出关键代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">createElm</span> (</span><br><span class="line">   vnode,</span><br><span class="line">   insertedVnodeQueue,</span><br><span class="line">   parentElm,</span><br><span class="line">   refElm,</span><br><span class="line">   nested,</span><br><span class="line">   ownerArray,</span><br><span class="line">   index</span><br><span class="line"> ) &#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">createComponent</span>(vnode, insertedVnodeQueue, parentElm, refElm)) &#123;</span><br><span class="line">     <span class="keyword">return</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">const</span> data = vnode.<span class="property">data</span></span><br><span class="line">   <span class="keyword">const</span> children = vnode.<span class="property">children</span></span><br><span class="line">   <span class="keyword">const</span> tag = vnode.<span class="property">tag</span></span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">isDef</span>(tag)) &#123;</span><br><span class="line">     vnode.<span class="property">elm</span> = vnode.<span class="property">ns</span></span><br><span class="line">       ? nodeOps.<span class="title function_">createElementNS</span>(vnode.<span class="property">ns</span>, tag)</span><br><span class="line">       : nodeOps.<span class="title function_">createElement</span>(tag, vnode)</span><br><span class="line">     <span class="title function_">setScope</span>(vnode)</span><br><span class="line"></span><br><span class="line">     <span class="comment">/* istanbul ignore if */</span></span><br><span class="line">     <span class="keyword">if</span> (__WEEX__) &#123;</span><br><span class="line">       ...</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="title function_">createChildren</span>(vnode, children, insertedVnodeQueue)</span><br><span class="line">       <span class="keyword">if</span> (<span class="title function_">isDef</span>(data)) &#123;</span><br><span class="line">         <span class="title function_">invokeCreateHooks</span>(vnode, insertedVnodeQueue)</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="title function_">insert</span>(parentElm, vnode.<span class="property">elm</span>, refElm)</span><br><span class="line">     &#125;</span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">isTrue</span>(vnode.<span class="property">isComment</span>)) &#123;</span><br><span class="line">     vnode.<span class="property">elm</span> = nodeOps.<span class="title function_">createComment</span>(vnode.<span class="property">text</span>)</span><br><span class="line">     <span class="title function_">insert</span>(parentElm, vnode.<span class="property">elm</span>, refElm)</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     vnode.<span class="property">elm</span> = nodeOps.<span class="title function_">createTextNode</span>(vnode.<span class="property">text</span>)</span><br><span class="line">     <span class="title function_">insert</span>(parentElm, vnode.<span class="property">elm</span>, refElm)</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数接受七个参数，我们先只关注第一、三、四个，vnode不用说；parentElm和refElm表示将要创建的根节点的父元素和后面的兄弟元素，我们需要将根节点插入到指定位置。函数开头先用前四个参数调用<code>createComponent</code>，并且如果返回值为true的话直接结束，后面那一大段代码都不用执行了，就我们的例子来说，返回值确实是true。实际上在<code>vm.$createElement</code>中所有由<code>createComponent</code>(不是这里的createComponent)创建的vnode调用这里的createComponent都会返回true：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-element.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">_createElement</span> (</span><br><span class="line">  ...</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> tag === <span class="string">&#x27;string&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (config.<span class="title function_">isReservedTag</span>(tag)) &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (...) &#123;</span><br><span class="line">      <span class="comment">// component</span></span><br><span class="line">      vnode = <span class="title function_">createComponent</span>(<span class="title class_">Ctor</span>, data, context, children, tag)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// direct component options / constructor</span></span><br><span class="line">    vnode = <span class="title function_">createComponent</span>(tag, data, context, children)</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> vnode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们来看看patch中的createComponent：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createComponent</span> (vnode, insertedVnodeQueue, parentElm, refElm) &#123;</span><br><span class="line">  <span class="keyword">let</span> i = vnode.<span class="property">data</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isDef</span>(i)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isDef</span>(i = i.<span class="property">hook</span>) &amp;&amp; <span class="title function_">isDef</span>(i = i.<span class="property">init</span>)) &#123;</span><br><span class="line">      <span class="title function_">i</span>(vnode, <span class="literal">false</span> <span class="comment">/* hydrating */</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// after calling the init hook, if the vnode is a child component</span></span><br><span class="line">    <span class="comment">// it should&#x27;ve created a child instance and mounted it. the child</span></span><br><span class="line">    <span class="comment">// component also has set the placeholder vnode&#x27;s elm.</span></span><br><span class="line">    <span class="comment">// in that case we can just return the element and be done.</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isDef</span>(vnode.<span class="property">componentInstance</span>)) &#123;</span><br><span class="line">      <span class="title function_">initComponent</span>(vnode, insertedVnodeQueue)</span><br><span class="line">      <span class="title function_">insert</span>(parentElm, vnode.<span class="property">elm</span>, refElm)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里判断vnode中的data属性是否存在，然后在判断data中的hook及hook中的init函数是否存在，根据我们之前的分析，这些都是存在的，所以会调用<code>vnode.data.hook.init</code>函数，这个函数定义如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-component.js</span></span><br><span class="line">init (<span class="attr">vnode</span>: <span class="title class_">VNodeWithData</span>, <span class="attr">hydrating</span>: boolean): ?boolean &#123;</span><br><span class="line">  <span class="keyword">if</span> (</span><br><span class="line">    vnode.<span class="property">componentInstance</span> &amp;&amp;</span><br><span class="line">    !vnode.<span class="property">componentInstance</span>.<span class="property">_isDestroyed</span> &amp;&amp;</span><br><span class="line">    vnode.<span class="property">data</span>.<span class="property">keepAlive</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> child = vnode.<span class="property">componentInstance</span> = <span class="title function_">createComponentInstanceForVnode</span>(</span><br><span class="line">      vnode,</span><br><span class="line">      activeInstance</span><br><span class="line">    )</span><br><span class="line">    child.$mount(hydrating ? vnode.<span class="property">elm</span> : <span class="literal">undefined</span>, hydrating)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<p>if不满足，进入else，这里就是App这个组件实例化的地方。我们知道，这里的vnode保存了App的构造函数，我们通过<code>createComponentInstanceForVnode</code>创建一个App实例，并将它保存在componentInstance属性中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-component.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createComponentInstanceForVnode</span> (</span><br><span class="line">  <span class="attr">vnode</span>: any, <span class="comment">// we know it&#x27;s MountedComponentVNode but flow doesn&#x27;t</span></span><br><span class="line">  <span class="attr">parent</span>: any, <span class="comment">// activeInstance in lifecycle state</span></span><br><span class="line">): <span class="title class_">Component</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">options</span>: <span class="title class_">InternalComponentOptions</span> = &#123;</span><br><span class="line">    <span class="attr">_isComponent</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">_parentVnode</span>: vnode,</span><br><span class="line">    parent</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> vnode.<span class="property">componentOptions</span>.<span class="title class_">Ctor</span>(options)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>App的构造函数我们之前讲过了，这里我们给构造函数再传了一个options，注意options中包含的值，这些值最终都会被合并到被创建的vm实例的<code>$options</code>属性中。</p>
+<p>创建完App的实例后再调用$mount将这个实例渲染出来，<strong>这又会重新走一次<code>_render</code>和<code>_update</code>的过程</strong>，只不过当前实例变成了刚创建的App组件实例，而不是我们现在正在分析的根组件实例。这个重新的过程我们暂时按下不表，我们先假设它们已经走完了，这样我们从hook.init返回了重新来到了这里：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createComponent</span> (vnode, insertedVnodeQueue, parentElm, refElm) &#123;</span><br><span class="line">  <span class="keyword">let</span> i = vnode.<span class="property">data</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isDef</span>(i)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isDef</span>(i = i.<span class="property">hook</span>) &amp;&amp; <span class="title function_">isDef</span>(i = i.<span class="property">init</span>)) &#123;</span><br><span class="line">      <span class="title function_">i</span>(vnode, <span class="literal">false</span> <span class="comment">/* hydrating */</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 返回了，vnode.componentInstance已经保存了App实例</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// after calling the init hook, if the vnode is a child component</span></span><br><span class="line">    <span class="comment">// it should&#x27;ve created a child instance and mounted it. the child</span></span><br><span class="line">    <span class="comment">// component also has set the placeholder vnode&#x27;s elm.</span></span><br><span class="line">    <span class="comment">// in that case we can just return the element and be done.</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isDef</span>(vnode.<span class="property">componentInstance</span>)) &#123;</span><br><span class="line">      <span class="title function_">initComponent</span>(vnode, insertedVnodeQueue)</span><br><span class="line">      <span class="title function_">insert</span>(parentElm, vnode.<span class="property">elm</span>, refElm)</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再往下的if为真，我们先执行<code>initComponent</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">initComponent</span> (vnode, insertedVnodeQueue) &#123;</span><br><span class="line">  ...</span><br><span class="line">  vnode.<span class="property">elm</span> = vnode.<span class="property">componentInstance</span>.<span class="property">$el</span></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>关键的代码就上面一句，App实例(vnode.componentInstance)mount之后，实例中的<code>$el</code>就是它的根元素，我们把它赋给<code>vnode.elm</code>。</p>
+<p>接下来就是insert操作，这才是真正的dom操作，把这个渲染好的根元素插入到指定位置：<code>insert(parentElm, vnode.elm, refElm)</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">insert</span> (parent, elm, ref) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isDef</span>(parent)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">isDef</span>(ref)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (nodeOps.<span class="title function_">parentNode</span>(ref) === parent) &#123;</span><br><span class="line">        nodeOps.<span class="title function_">insertBefore</span>(parent, elm, ref)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      nodeOps.<span class="title function_">appendChild</span>(parent, elm)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，根组件就展示在页面上面了：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1541864549578.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>由于createComponent返回true，createElm直接返回，这样patch继续：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js	</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">patch</span> (oldVnode, vnode, hydrating, removeOnly) &#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">isUndef</span>(oldVnode)) &#123;</span><br><span class="line">     ...</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="keyword">if</span> (!isRealElement &amp;&amp; <span class="title function_">sameVnode</span>(oldVnode, vnode)) &#123;</span><br><span class="line">       ...</span><br><span class="line">     &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="comment">// create new node</span></span><br><span class="line">       <span class="title function_">createElm</span>(</span><br><span class="line">         vnode,</span><br><span class="line">         insertedVnodeQueue,</span><br><span class="line">         <span class="comment">// extremely rare edge case: do not insert if old element is in a</span></span><br><span class="line">         <span class="comment">// leaving transition. Only happens when combining transition +</span></span><br><span class="line">         <span class="comment">// keep-alive + HOCs. (#4590)</span></span><br><span class="line">         oldElm.<span class="property">_leaveCb</span> ? <span class="literal">null</span> : parentElm,</span><br><span class="line">         nodeOps.<span class="title function_">nextSibling</span>(oldElm)</span><br><span class="line">       )</span><br><span class="line">       </span><br><span class="line">       <span class="comment">// 继续</span></span><br><span class="line">      </span><br><span class="line">       <span class="comment">// destroy old node</span></span><br><span class="line">       <span class="keyword">if</span> (<span class="title function_">isDef</span>(parentElm)) &#123;</span><br><span class="line">         <span class="title function_">removeVnodes</span>(parentElm, [oldVnode], <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">isDef</span>(oldVnode.<span class="property">tag</span>)) &#123;</span><br><span class="line">         ...</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> vnode.<span class="property">elm</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们新创建了一个根元素(vnode.elm)，所以需要把以前的删掉：<code>removeVnodes(parentElm, [oldVnode], 0, 0)</code>。然后就返回新的根元素，重新回到<code>_update</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="property">$el</span> = vm.<span class="title function_">__patch__</span>(vm.<span class="property">$el</span>, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br></pre></td></tr></table></figure>
+
+<p>至此，故事告一段落，下次继续讲解App实例是怎么mount的。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.568Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/read-source-code/" rel="tag">read-source-code</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vue/" rel="tag">vue</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-patch-1/&title=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-patch-1/&title=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-patch-1/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-patch-1/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-patch-1/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/vue-patch-2/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">vue patch算法解读之二：自定义组件的实例化及首次渲染</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/property-attribtes-tips/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">property descriptor的几个疑难点</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-patch-1/&title=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-patch-1/&title=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-patch-1/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《vue patch算法解读之一：根组件的初始化》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-patch-1/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-patch-1/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/vue-patch-1/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

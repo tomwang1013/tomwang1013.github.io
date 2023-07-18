@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>vue patch算法解读之二：自定义组件的实例化及首次渲染 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="vue,read-source-code">
+    <meta name="description" content="在上一篇中我们介绍了根组件root的初始化渲染过程： 123new Vue(&amp;#123;  render: h &#x3D;&gt; h(App),&amp;#125;).$mount(&amp;#x27;#app&amp;#x27;)  当时我们提到，root的_vnode的componentInstance中存储了App组件的实例(后面称为app)： 12345const child &#x3D; vnode.componentInst">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vue patch算法解读之二：自定义组件的实例化及首次渲染">
+<meta property="og:url" content="http://tomwang1013.github.io/vue-patch-2/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="在上一篇中我们介绍了根组件root的初始化渲染过程： 123new Vue(&amp;#123;  render: h &#x3D;&gt; h(App),&amp;#125;).$mount(&amp;#x27;#app&amp;#x27;)  当时我们提到，root的_vnode的componentInstance中存储了App组件的实例(后面称为app)： 12345const child &#x3D; vnode.componentInst">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1541987629081.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1542000170374.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1542003332390.png">
+<meta property="article:published_time" content="2018-11-12T01:08:46.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.568Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="vue">
+<meta property="article:tag" content="read-source-code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1541987629081.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">vue patch算法解读之二：自定义组件的实例化及首次渲染</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">vue patch算法解读之二：自定义组件的实例化及首次渲染</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-11-12T01:08:46.000Z" itemprop="datePublished" class="page-time">
+  2018-11-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#render"><span class="post-toc-number">1.</span> <span class="post-toc-text">render</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#update"><span class="post-toc-number">2.</span> <span class="post-toc-text">update</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-vue-patch-2"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">vue patch算法解读之二：自定义组件的实例化及首次渲染</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-11-12 09:08:46" datetime="2018-11-12T01:08:46.000Z"  itemprop="datePublished">2018-11-12</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>在<a target="_blank" rel="noopener" href="http://jinge.red/vue-patch-1/">上一篇</a>中我们介绍了根组件root的初始化渲染过程：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">Vue</span>(&#123;</span><br><span class="line">  <span class="attr">render</span>: <span class="function"><span class="params">h</span> =&gt;</span> <span class="title function_">h</span>(<span class="title class_">App</span>),</span><br><span class="line">&#125;).$mount(<span class="string">&#x27;#app&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>当时我们提到，root的_vnode的<code>componentInstance</code>中存储了App组件的实例(后面称为app)：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> child = vnode.<span class="property">componentInstance</span> = <span class="title function_">createComponentInstanceForVnode</span>(</span><br><span class="line">  vnode,</span><br><span class="line">  activeInstance</span><br><span class="line">)</span><br><span class="line">child.$mount(hydrating ? vnode.<span class="property">elm</span> : <span class="literal">undefined</span>, hydrating)</span><br></pre></td></tr></table></figure>
+
+<p>在app这个实例mount之后，我们把app.$el插入到页面上整个root就渲染出来了，其中的数据结构如下：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1541987629081.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>本篇中我们详细看看<code>app</code>的创建及首次渲染过程，我们从createComponentInstanceForVnode开始，在本例中，我们传给你它的2个参数依次为<code>root._vnode</code>和<code>root</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createComponentInstanceForVnode</span> (</span><br><span class="line">  <span class="attr">vnode</span>: any, <span class="comment">// we know it&#x27;s MountedComponentVNode but flow doesn&#x27;t</span></span><br><span class="line">  <span class="attr">parent</span>: any, <span class="comment">// activeInstance in lifecycle state</span></span><br><span class="line">): <span class="title class_">Component</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">options</span>: <span class="title class_">InternalComponentOptions</span> = &#123;</span><br><span class="line">    <span class="attr">_isComponent</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">_parentVnode</span>: vnode,</span><br><span class="line">    parent</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> vnode.<span class="property">componentOptions</span>.<span class="title class_">Ctor</span>(options)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>App的构造函数是<code>Vue.extend</code>中定义的，最终会调用<code>Vue.prototype._init</code>进行初始化：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/init.js</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">_init</span> = <span class="keyword">function</span> (<span class="params">options?: <span class="built_in">Object</span></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">vm</span>: <span class="title class_">Component</span> = <span class="variable language_">this</span></span><br><span class="line">  vm.<span class="property">_uid</span> = uid++</span><br><span class="line">  vm.<span class="property">_isVue</span> = <span class="literal">true</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">// merge options</span></span><br><span class="line">  <span class="keyword">if</span> (options &amp;&amp; options.<span class="property">_isComponent</span>) &#123;</span><br><span class="line">    <span class="comment">// optimize internal component instantiation</span></span><br><span class="line">    <span class="comment">// since dynamic options merging is pretty slow, and none of the</span></span><br><span class="line">    <span class="comment">// internal component options needs special treatment.</span></span><br><span class="line">    <span class="title function_">initInternalComponent</span>(vm, options)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    vm.<span class="property">$options</span> = <span class="title function_">mergeOptions</span>(</span><br><span class="line">      <span class="title function_">resolveConstructorOptions</span>(vm.<span class="property">constructor</span>),</span><br><span class="line">      options || &#123;&#125;,</span><br><span class="line">      vm</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  vm.<span class="property">_renderProxy</span> = vm</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// expose real self</span></span><br><span class="line">  vm.<span class="property">_self</span> = vm</span><br><span class="line">  <span class="title function_">initLifecycle</span>(vm)</span><br><span class="line">  <span class="title function_">initEvents</span>(vm)</span><br><span class="line">  <span class="title function_">initRender</span>(vm)</span><br><span class="line">  <span class="title function_">callHook</span>(vm, <span class="string">&#x27;beforeCreate&#x27;</span>)</span><br><span class="line">  <span class="title function_">initInjections</span>(vm) <span class="comment">// resolve injections before data/props</span></span><br><span class="line">  <span class="title function_">initState</span>(vm)</span><br><span class="line">  <span class="title function_">initProvide</span>(vm) <span class="comment">// resolve provide after data/props</span></span><br><span class="line">  <span class="title function_">callHook</span>(vm, <span class="string">&#x27;created&#x27;</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (vm.<span class="property">$options</span>.<span class="property">el</span>) &#123;</span><br><span class="line">    vm.$mount(vm.<span class="property">$options</span>.<span class="property">el</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个初始化方法主要有三个步骤：</p>
+<ol>
+<li><p>得到vm的最终的$options</p>
+<p>主要是把参数中的options和构造函数的options合并起来作为最终的<code>$options</code>，这里我们options._isComponent是true，所以走的是initInternalComponent，这个细节不讨论，有兴趣大家可以看看参考文档(<a target="_blank" rel="noopener" href="http://hcysun.me/vue-design/art/">http://hcysun.me/vue-design/art/</a>)</p>
+</li>
+<li><p>做各种初始化</p>
+<p>有兴趣参考(<a target="_blank" rel="noopener" href="http://hcysun.me/vue-design/art/)%EF%BC%8C%E8%BF%99%E9%87%8C%E6%88%91%E4%BB%AC%E5%8F%AA%E5%88%97%E5%87%BA%E4%B8%80%E7%82%B9%EF%BC%9A%E5%9C%A8initLifecycle%E4%B8%AD%E6%88%91%E4%BB%AC%E8%AE%BE%E7%BD%AE%E4%BA%86%60vm.$parent%60%E5%8F%8A%60vm.$root%60">http://hcysun.me/vue-design/art/)，这里我们只列出一点：在initLifecycle中我们设置了`vm.$parent`及`vm.$root`</a>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/lifecycle.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">initLifecycle</span> (<span class="attr">vm</span>: <span class="title class_">Component</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> options = vm.<span class="property">$options</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> parent = options.<span class="property">parent</span></span><br><span class="line">  <span class="keyword">if</span> (parent &amp;&amp; !options.<span class="property">abstract</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    parent.<span class="property">$children</span>.<span class="title function_">push</span>(vm)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  vm.<span class="property">$parent</span> = parent</span><br><span class="line">  vm.<span class="property">$root</span> = parent ? parent.<span class="property">$root</span> : vm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们这里的options里面是传了parent选项的，这里的值是root</p>
+</li>
+<li><p>mount</p>
+<p>这里if条件不成立，所以没有mount，mount发生在实例被创建之后</p>
+</li>
+</ol>
+<p>app创建之后，我们马上进行了mount：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">child.$mount(hydrating ? vnode.<span class="property">elm</span> : <span class="literal">undefined</span>, hydrating)</span><br></pre></td></tr></table></figure>
+
+<p>第一个参数是<code>undefined</code>，第二个参数是false。我们知道，mount会重新走<code>_render</code>及<code>_update</code>的过程，我们先看看_render，简化如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/render.js  </span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">_render</span> = <span class="keyword">function</span> (<span class="params"></span>): <span class="title class_">VNode</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">vm</span>: <span class="title class_">Component</span> = <span class="variable language_">this</span></span><br><span class="line">  <span class="keyword">const</span> &#123; render, _parentVnode &#125; = vm.<span class="property">$options</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/*if (_parentVnode) &#123;</span></span><br><span class="line"><span class="comment">    vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject</span></span><br><span class="line"><span class="comment">  &#125;*/</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// set parent vnode. this allows render functions to have access</span></span><br><span class="line">  <span class="comment">// to the data on the placeholder node.</span></span><br><span class="line">  vm.<span class="property">$vnode</span> = _parentVnode</span><br><span class="line">  <span class="comment">// render self</span></span><br><span class="line">  <span class="keyword">let</span> vnode</span><br><span class="line">  vnode = render.<span class="title function_">call</span>(vm.<span class="property">_renderProxy</span>, vm.<span class="property">$createElement</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// set parent</span></span><br><span class="line">  vnode.<span class="property">parent</span> = _parentVnode</span><br><span class="line">  <span class="keyword">return</span> vnode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在render之前我们设置了实例的<code>$vnode</code>属性，render之后又设置了vnode.parent属性，<code>_render</code>函数返回的vnode传入<code>_update</code>，我们看看update：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/instance/lifecycle.js</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">_update</span> = <span class="keyword">function</span> (<span class="params">vnode: VNode, hydrating?: boolean</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">vm</span>: <span class="title class_">Component</span> = <span class="variable language_">this</span></span><br><span class="line">  <span class="keyword">const</span> prevEl = vm.<span class="property">$el</span></span><br><span class="line">  <span class="keyword">const</span> prevVnode = vm.<span class="property">_vnode</span></span><br><span class="line">  <span class="keyword">const</span> prevActiveInstance = activeInstance</span><br><span class="line">  activeInstance = vm</span><br><span class="line">  vm.<span class="property">_vnode</span> = vnode</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Vue.prototype.__patch__ is injected in entry points</span></span><br><span class="line">  <span class="comment">// based on the rendering backend used.</span></span><br><span class="line">  <span class="keyword">if</span> (!prevVnode) &#123;</span><br><span class="line">    <span class="comment">// initial render</span></span><br><span class="line">    vm.<span class="property">$el</span> = vm.<span class="title function_">__patch__</span>(vm.<span class="property">$el</span>, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// updates</span></span><br><span class="line">  &#125;</span><br><span class="line">  activeInstance = prevActiveInstance</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// if parent is an HOC, update its $el as well</span></span><br><span class="line">  <span class="keyword">if</span> (vm.<span class="property">$vnode</span> &amp;&amp; vm.<span class="property">$parent</span> &amp;&amp; vm.<span class="property">$vnode</span> === vm.<span class="property">$parent</span>.<span class="property">_vnode</span>) &#123;</span><br><span class="line">    vm.<span class="property">$parent</span>.<span class="property">$el</span> = vm.<span class="property">$el</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// updated hook is called by the scheduler to ensure that children are</span></span><br><span class="line">  <span class="comment">// updated in a parent&#x27;s updated hook.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>prevEl</code>和<code>prevVnode</code>分别保存之前的根元素(<code>$el</code>)和<code>_vnode</code>，在首次渲染之前，它们都是空的。然后设置新的<code>_vnode</code>，并在patch之后设置新的<code>$el</code>，并且在patch之前修改全局变量<code>activeInstance</code>，设置为自己，这里即app实例，patch完之后再还原成root。最后是一个if语句，在本例中是满足的，所以把root的根元素置为和app的一样，所以经过<code>_render</code>和<code>_update</code>时候数据结构变成：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542000170374.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>理解了大概的数据结构之后，我们再详细看看app的render和update过程</p>
+<h1 id="render"><a href="#render" class="headerlink" title="render"></a>render</h1><p>App组件的html模板为：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;app&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">img</span> <span class="attr">alt</span>=<span class="string">&quot;Vue logo&quot;</span> <span class="attr">src</span>=<span class="string">&quot;./assets/logo.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>hello, world!<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>它生产的render函数如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// webpack:///./src/App.vue?5b21</span></span><br><span class="line"><span class="keyword">var</span> render = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">var</span> _vm = <span class="variable language_">this</span></span><br><span class="line">  <span class="keyword">var</span> _h = _vm.<span class="property">$createElement</span></span><br><span class="line">  <span class="keyword">var</span> _c = _vm.<span class="property">_self</span>.<span class="property">_c</span> || _h</span><br><span class="line">  <span class="keyword">return</span> _vm.<span class="title function_">_m</span>(<span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> staticRenderFns = [</span><br><span class="line">  <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> _vm = <span class="variable language_">this</span></span><br><span class="line">    <span class="keyword">var</span> _h = _vm.<span class="property">$createElement</span></span><br><span class="line">    <span class="keyword">var</span> _c = _vm.<span class="property">_self</span>.<span class="property">_c</span> || _h</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">_c</span>(<span class="string">&quot;div&quot;</span>, &#123; <span class="attr">attrs</span>: &#123; <span class="attr">id</span>: <span class="string">&quot;app&quot;</span> &#125; &#125;, [</span><br><span class="line">      <span class="title function_">_c</span>(<span class="string">&quot;img&quot;</span>, &#123;</span><br><span class="line">        <span class="attr">attrs</span>: &#123; <span class="attr">alt</span>: <span class="string">&quot;Vue logo&quot;</span>, <span class="attr">src</span>: <span class="built_in">require</span>(<span class="string">&quot;./assets/logo.png&quot;</span>) &#125;</span><br><span class="line">      &#125;),</span><br><span class="line">      <span class="title function_">_c</span>(<span class="string">&quot;div&quot;</span>, [_vm.<span class="title function_">_v</span>(<span class="string">&quot;hello, world!&quot;</span>)])</span><br><span class="line">    ])</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br><span class="line">render.<span class="property">_withStripped</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123; render, staticRenderFns &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在<code>_render</code>中是这么调用的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vnode = render.<span class="title function_">call</span>(vm.<span class="property">_renderProxy</span>, vm.<span class="property">$createElement</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>vm._renderProxy</code>在生产环境下就是vm，<code>_vm._m</code>其实就是<code>staticRenderFns</code>，<code>_c</code>定义如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="property">_c</span> = <span class="function">(<span class="params">a, b, c, d</span>) =&gt;</span> <span class="title function_">createElement</span>(vm, a, b, c, d, <span class="literal">false</span>)</span><br></pre></td></tr></table></figure>
+
+<p>最终执行的是下面这段代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="title function_">_c</span>(<span class="string">&quot;div&quot;</span>, &#123; <span class="attr">attrs</span>: &#123; <span class="attr">id</span>: <span class="string">&quot;app&quot;</span> &#125; &#125;, [</span><br><span class="line">  <span class="title function_">_c</span>(<span class="string">&quot;img&quot;</span>, &#123;</span><br><span class="line">    <span class="attr">attrs</span>: &#123; <span class="attr">alt</span>: <span class="string">&quot;Vue logo&quot;</span>, <span class="attr">src</span>: <span class="built_in">require</span>(<span class="string">&quot;./assets/logo.png&quot;</span>) &#125;</span><br><span class="line">  &#125;),</span><br><span class="line">  <span class="title function_">_c</span>(<span class="string">&quot;div&quot;</span>, [_vm.<span class="title function_">_v</span>(<span class="string">&quot;hello, world!&quot;</span>)])</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>最终执行的是<code>_createElement</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-element.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">_createElement</span> (</span><br><span class="line">  <span class="attr">context</span>: <span class="title class_">Component</span>,</span><br><span class="line">  tag?: string | <span class="title class_">Class</span>&lt;<span class="title class_">Component</span>&gt; | <span class="title class_">Function</span> | <span class="title class_">Object</span>,</span><br><span class="line">  data?: <span class="title class_">VNodeData</span>,</span><br><span class="line">  children?: any,</span><br><span class="line">  normalizationType?: number</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对顶层的div来说，传递给这个函数的参数为：</p>
+<ul>
+<li><p>context：当前实例，即app</p>
+</li>
+<li><p>tag：”div”</p>
+</li>
+<li><p>data：<code>&#123; attrs: &#123; id: &quot;app&quot; &#125; &#125;</code></p>
+</li>
+<li><p>children:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  <span class="title function_">_c</span>(<span class="string">&quot;img&quot;</span>, &#123;</span><br><span class="line">    <span class="attr">attrs</span>: &#123; <span class="attr">alt</span>: <span class="string">&quot;Vue logo&quot;</span>, <span class="attr">src</span>: <span class="built_in">require</span>(<span class="string">&quot;./assets/logo.png&quot;</span>) &#125;</span><br><span class="line">  &#125;),</span><br><span class="line">  <span class="title function_">_c</span>(<span class="string">&quot;div&quot;</span>, [_vm.<span class="title function_">_v</span>(<span class="string">&quot;hello, world!&quot;</span>)])</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>其实就是包含2个vnode元素的数组</p>
+</li>
+<li><p>normalizationType：undefined</p>
+</li>
+</ul>
+<p>根据这些参数，这个函数的执行路径为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/create-element.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">_createElement</span> (</span><br><span class="line">  ...</span><br><span class="line">): <span class="title class_">VNode</span> | <span class="title class_">Array</span>&lt;<span class="title class_">VNode</span>&gt; &#123;</span><br><span class="line">  <span class="keyword">let</span> vnode, ns</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> tag === <span class="string">&#x27;string&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (config.<span class="title function_">isReservedTag</span>(tag)) &#123;</span><br><span class="line">      <span class="comment">// platform built-in elements</span></span><br><span class="line">      vnode = <span class="keyword">new</span> <span class="title class_">VNode</span>(</span><br><span class="line">        config.<span class="title function_">parsePlatformTagName</span>(tag), data, children,</span><br><span class="line">        <span class="literal">undefined</span>, <span class="literal">undefined</span>, context</span><br><span class="line">      )</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (...) &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> vnode</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接是以内置div标签new一个vnode出来</p>
+<h1 id="update"><a href="#update" class="headerlink" title="update"></a>update</h1><p>得到这个vnode之后，我们调用patch：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="title function_">__patch__</span>(vm.<span class="property">$el</span>, vnode, hydrating, <span class="literal">false</span> <span class="comment">/* removeOnly */</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这是<code>vm.$el</code>是undefined，因为这是首次渲染，我看把视角转向patch函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">return</span> <span class="keyword">function</span> <span class="title function_">patch</span> (oldVnode, vnode, hydrating, removeOnly) &#123;</span><br><span class="line">  <span class="keyword">let</span> isInitialPatch = <span class="literal">false</span></span><br><span class="line">  <span class="keyword">const</span> insertedVnodeQueue = []</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isUndef</span>(oldVnode)) &#123;</span><br><span class="line">    <span class="comment">// empty mount (likely as component), create new root element</span></span><br><span class="line">    isInitialPatch = <span class="literal">true</span></span><br><span class="line">    <span class="title function_">createElm</span>(vnode, insertedVnodeQueue)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> vnode.<span class="property">elm</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这次很简单，因为<code>oldVnode</code>是空的，所以直接调用<code>createElm</code>基本就结束了，这次只传了2个参数，我们看看这个函数这次的执行路径：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/core/vdom/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">createElm</span> (</span><br><span class="line">  vnode,</span><br><span class="line">  insertedVnodeQueue,</span><br><span class="line">  parentElm,</span><br><span class="line">  refElm,</span><br><span class="line">  nested,</span><br><span class="line">  ownerArray,</span><br><span class="line">  index</span><br><span class="line">) &#123;</span><br><span class="line">  vnode.<span class="property">isRootInsert</span> = !nested <span class="comment">// for transition enter check</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">createComponent</span>(vnode, insertedVnodeQueue, parentElm, refElm)) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> data = vnode.<span class="property">data</span></span><br><span class="line">  <span class="keyword">const</span> children = vnode.<span class="property">children</span></span><br><span class="line">  <span class="keyword">const</span> tag = vnode.<span class="property">tag</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isDef</span>(tag)) &#123;</span><br><span class="line">    vnode.<span class="property">elm</span> = nodeOps.<span class="title function_">createElement</span>(tag, vnode)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (__WEEX__) &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="title function_">createChildren</span>(vnode, children, insertedVnodeQueue)</span><br><span class="line">      <span class="keyword">if</span> (<span class="title function_">isDef</span>(data)) &#123;</span><br><span class="line">        <span class="title function_">invokeCreateHooks</span>(vnode, insertedVnodeQueue)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">isTrue</span>(vnode.<span class="property">isComment</span>)) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这次createComponent是不会返回true的，且调用之后没有任何效果，因为这里的vnode只是一个div的包装而已。代码直接进入第一个if执行下面这行代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vnode.<span class="property">elm</span> = nodeOps.<span class="title function_">createElement</span>(tag, vnode)</span><br></pre></td></tr></table></figure>
+
+<p>它直接创建一个div元素！因为children还有2个vnode，所以再调用<code>createChildren</code>创建子元素，这样app的整个dom就创建好了，然后patch直接返回根元素。最后回到<code>_update</code>把这个元素赋给<code>vm.$el</code>，整个数据结构变成：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1542003332390.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>在上一篇我们知道，这个根元素最终会被root插入到文档中从而展示在页面上。至此，下面这两三行简单的代码基本分析完了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">App</span> <span class="keyword">from</span> <span class="string">&#x27;./App.vue&#x27;</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Vue</span>(&#123;</span><br><span class="line">  <span class="attr">render</span>: <span class="function"><span class="params">h</span> =&gt;</span> <span class="title function_">h</span>(<span class="title class_">App</span>),</span><br><span class="line">&#125;).$mount(<span class="string">&#x27;#app&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这后面其实牵涉到很多逻辑，何况我们还省略了很多细节，但是更复杂的情况也能从这里推导出来。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.568Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/read-source-code/" rel="tag">read-source-code</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vue/" rel="tag">vue</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-patch-2/&title=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-patch-2/&title=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-patch-2/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-patch-2/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-patch-2/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/pwa-cache-then-network/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">PWA的一种fetch模式：cache then network</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/vue-patch-1/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">vue patch算法解读之一：根组件的初始化</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-patch-2/&title=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-patch-2/&title=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-patch-2/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《vue patch算法解读之二：自定义组件的实例化及首次渲染》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-patch-2/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-patch-2/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/vue-patch-2/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

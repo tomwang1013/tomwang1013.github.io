@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>一文读懂vue响应式系统实现过程 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="vue">
+    <meta name="description" content="和众多前端框架一样，vue的数据驱动系统是它的核心，很多人都大概知道它是通过Object.defineProperty将普通属性变成get,set实现的，但知道这一点其实没啥用，因为实际情况远比这个复杂、精巧，本文尝试对整个响应式系统做一个简短、清晰、全面而不失深度的总结。以我自己这两年来使用vue的经验，了解这个系统是如何运作的对用好vue是非常有帮助的 概述数据驱动系统用一句话来概括就是：当数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文读懂vue响应式系统实现过程">
+<meta property="og:url" content="http://tomwang1013.github.io/vue-reactive/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="和众多前端框架一样，vue的数据驱动系统是它的核心，很多人都大概知道它是通过Object.defineProperty将普通属性变成get,set实现的，但知道这一点其实没啥用，因为实际情况远比这个复杂、精巧，本文尝试对整个响应式系统做一个简短、清晰、全面而不失深度的总结。以我自己这两年来使用vue的经验，了解这个系统是如何运作的对用好vue是非常有帮助的 概述数据驱动系统用一句话来概括就是：当数">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540791924393.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540794060376.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540797011499.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540886749054.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1541470064217.png">
+<meta property="article:published_time" content="2018-10-28T10:45:11.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.568Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="vue">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1540791924393.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">一文读懂vue响应式系统实现过程</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">一文读懂vue响应式系统实现过程</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-10-28T10:45:11.000Z" itemprop="datePublished" class="page-time">
+  2018-10-28
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="post-toc-number">1.</span> <span class="post-toc-text">概述</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E5%B0%86%E6%95%B0%E6%8D%AE%E5%8F%98%E6%88%90%E5%93%8D%E5%BA%94%E5%BC%8F"><span class="post-toc-number">2.</span> <span class="post-toc-text">将数据变成响应式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%89%A9%E5%85%85%E5%8F%8A%E8%BE%B9%E7%95%8C%EF%BC%9A%E5%86%8D%E7%9C%8BObserver"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">扩充及边界：再看Observer</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%94%B6%E9%9B%86%E7%9B%91%E5%90%AC%E8%80%85"><span class="post-toc-number">3.</span> <span class="post-toc-text">收集监听者</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Dep"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">Dep</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#watcher"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">watcher</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#vue%E4%B8%ADwatcher%E7%9A%84%E5%88%86%E7%B1%BB"><span class="post-toc-number">3.2.1.</span> <span class="post-toc-text">vue中watcher的分类</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%86%8D%E7%9C%8Bgetter"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">再看getter</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E6%80%BB%E7%BB%93"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">总结</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E9%80%9A%E7%9F%A5%E7%9B%91%E5%90%AC%E8%80%85%E6%9B%B4%E6%96%B0"><span class="post-toc-number">4.</span> <span class="post-toc-text">通知监听者更新</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#setter"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">setter</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#dep-notify"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">dep.notify</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#watcher-update"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">watcher.update</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%BC%82%E6%AD%A5%E6%89%B9%E9%87%8F%E6%9B%B4%E6%96%B0"><span class="post-toc-number">4.3.1.</span> <span class="post-toc-text">异步批量更新</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#computed%E5%B1%9E%E6%80%A7%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="post-toc-number">5.</span> <span class="post-toc-text">computed属性实现原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%AE%A1%E7%AE%97%E5%B1%9E%E6%80%A7%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96%E7%AE%80%E4%BB%8B"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">计算属性的初始化简介</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E8%AE%A1%E7%AE%97%E5%B1%9E%E6%80%A7%E7%9A%84%E6%B1%82%E5%80%BC"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">计算属性的求值</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#computed-watcher%E7%9A%84%E6%9B%B4%E6%96%B0%EF%BC%9A%E5%86%8D%E7%9C%8Bupdate"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">computed watcher的更新：再看update</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%80%BB%E7%BB%93-1"><span class="post-toc-number">6.</span> <span class="post-toc-text">总结</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-vue-reactive"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">一文读懂vue响应式系统实现过程</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-10-28 18:45:11" datetime="2018-10-28T10:45:11.000Z"  itemprop="datePublished">2018-10-28</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>和众多前端框架一样，vue的数据驱动系统是它的核心，很多人都大概知道它是通过<code>Object.defineProperty</code>将普通属性变成<code>get</code>,<code>set</code>实现的，但知道这一点其实没啥用，因为实际情况远比这个复杂、精巧，本文尝试对整个响应式系统做一个简短、清晰、全面而不失深度的总结。以我自己这两年来使用vue的经验，了解这个系统是如何运作的对用好vue是非常有帮助的</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>数据驱动系统用一句话来概括就是：当数据变化时，自动通知监听者(也叫观察者、依赖者等)，这里面有两个主体：一是数据(data)，二是监听者(watcher)。它们两个是多对多的关系：一个数据可以有多个监听者，同时一个监听者可以同时监听多个数据：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540791924393.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>既然要通知，就牵涉到两个问题：</p>
+<ul>
+<li>怎么知道数据变化了？</li>
+<li>通知谁？</li>
+</ul>
+<p>我们先看下第一个问题：怎么知道数据变化了？</p>
+<p>这个问题很简单，当我们改变对象某个属性的值，如<code>obj.foo = 1</code>时，如果<code>foo</code>是一个<code>setter</code>属性，那这个赋值操作就会调用setter函数，所以在setter函数中我们就可以知道属性的值变了。所以数据驱动的第一步便是要将数据对象的普通属性转为化<code>accessor</code>属性，我们称这一步为<strong>将数据变成响应式</strong>。</p>
+<p>再来看第二个问题：数据变化时，通知谁？</p>
+<p>很简单：谁依赖于我就通知谁啊。所以问题变成如何收集所有的对此数据的监听者。所谓监听者依赖于数据，指的是监听者在自身的执行过程中<strong>访问了数据</strong>，所以当其所访问的数据发生变化时，我们需要通知他重新执行一下。所以，我们可以在数据被访问的时候(getter)将当前的访问者(假设我们知道)保存起来，然后在数据变化的时候依次通知他们更新, 伪代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;</span><br><span class="line">  <span class="keyword">const</span> watchers = []; <span class="comment">// 对foo字段的监听者</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> <span class="title function_">foo</span>() &#123;</span><br><span class="line">    <span class="comment">// 假设当前的访问者是currentWatcher</span></span><br><span class="line">    watchers.<span class="title function_">push</span>(currentWatcher)</span><br><span class="line">  &#125;，</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">set</span> <span class="title function_">foo</span>(<span class="params">newValue</span>) &#123;</span><br><span class="line">    <span class="comment">// 数据变化，通知所有监听者更新</span></span><br><span class="line">    watchers.<span class="title function_">forEach</span>(<span class="function"><span class="params">w</span> =&gt;</span> w.<span class="title function_">update</span>())</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以整个数据驱动系统可以用下面的图简单概括：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540794060376.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>下面我们依次从源码分析图中的各个步骤是如何实现的。vue中响应式模块的代码如下，后面我们会直接引用文件名而忽略路径信息：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540797011499.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<h1 id="将数据变成响应式"><a href="#将数据变成响应式" class="headerlink" title="将数据变成响应式"></a>将数据变成响应式</h1><p>要构建响应式数据系统，首先要把数据变成响应式，准确地说是把一个<strong>对象</strong>变成响应式，这样我们就能知道何时访问或修改了这个对象的属性。根据前面的描述，这个过程很简单，就是遍历对象的所有属性，利用<code>defineProperty</code>把它们变成<code>accessor</code>(getter &amp; setter)，但是需要注意以下几点：</p>
+<ul>
+<li>对象的每个属性都是单独收集自己的watcher的，所以在遍历的过程中需要为每个属性准备一个专属于它的容器来保存将来要收集的监听者</li>
+<li>根据情况我们需要深度遍历：属性的值可能也是个对象，我们需要把这个子对象也变成响应式</li>
+<li>如果这个<strong>对象</strong>是一个数组，我们需要把数组的每个元素变成响应式</li>
+</ul>
+<p>根据这几点，我们来看看源码，把对象变成响应式的入口在<code>index.js</code>的<code>observe</code>中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">observe</span> (<span class="attr">value</span>: any, <span class="attr">asRootData</span>: ?boolean): <span class="title class_">Observer</span> | <span class="keyword">void</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  ob = <span class="keyword">new</span> <span class="title class_">Observer</span>(value)</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> ob;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个入口函数主要是做了一些判断，看看value能否转成响应式以及是否已经是响应式了，真正的入口是<code>Observer</code>这个class的构造函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js: 省略了一些代码</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Observer</span> &#123;</span><br><span class="line">  <span class="attr">value</span>: any; <span class="comment">// 需要转成响应式的对象</span></span><br><span class="line"></span><br><span class="line">  <span class="title function_">constructor</span> (<span class="attr">value</span>: any) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = value</span><br><span class="line">    <span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(value)) &#123;</span><br><span class="line">      <span class="comment">// 如果是数组，把数组的每个元素变成响应式</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">observeArray</span>(value)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// 如果是普通对象，遍历它的每个属性，将其变成accessor属性</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">walk</span>(value)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  walk (<span class="attr">obj</span>: <span class="title class_">Object</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> keys = <span class="title class_">Object</span>.<span class="title function_">keys</span>(obj)</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; keys.<span class="property">length</span>; i++) &#123;</span><br><span class="line">      <span class="title function_">defineReactive</span>(obj, keys[i])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  observeArray (<span class="attr">items</span>: <span class="title class_">Array</span>&lt;any&gt;) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, l = items.<span class="property">length</span>; i &lt; l; i++) &#123;</span><br><span class="line">      <span class="title function_">observe</span>(items[i])</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，真正把对象的某个属性变成<code>accessor</code>的是<code>defineReactive</code>，对于每个属性，都需要调用一次这个函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js: 省略部分代码</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">defineReactive</span> (</span><br><span class="line">  <span class="attr">obj</span>: <span class="title class_">Object</span>,</span><br><span class="line">  <span class="attr">key</span>: string,</span><br><span class="line">  <span class="attr">val</span>: any,</span><br><span class="line">  customSetter?: ?<span class="title class_">Function</span>,</span><br><span class="line">  shallow?: boolean</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="comment">// 这个属性(key)专有的用来收集watcher的容器</span></span><br><span class="line">  <span class="keyword">const</span> dep = <span class="keyword">new</span> <span class="title class_">Dep</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 深度遍历：将所有子对象也变成响应式</span></span><br><span class="line">  <span class="keyword">let</span> childOb = !shallow &amp;&amp; <span class="title function_">observe</span>(val)</span><br><span class="line">  </span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(obj, key, &#123;</span><br><span class="line">    <span class="attr">enumerable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">configurable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">get</span>: <span class="keyword">function</span> <span class="title function_">reactiveGetter</span> () &#123;</span><br><span class="line">      <span class="keyword">const</span> value = getter ? getter.<span class="title function_">call</span>(obj) : val</span><br><span class="line">      <span class="comment">// 如果当前存在监听者，将它收集起来</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="title class_">Dep</span>.<span class="property">target</span><span class="comment">/*当前监听者*/</span>) &#123;</span><br><span class="line">        dep.<span class="title function_">depend</span>() <span class="comment">// 收集动作</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> value</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">set</span>: <span class="keyword">function</span> <span class="title function_">reactiveSetter</span> (newVal) &#123;</span><br><span class="line">      <span class="comment">// 如果数据发生变化，通知所有收集到的监听者</span></span><br><span class="line">      dep.<span class="title function_">notify</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这些代码实现完全印证了我们前面的思路：当后面有watcher访问响应式对象的属性时，getter被调用，访问者被对应属性收集</p>
+<h2 id="扩充及边界：再看Observer"><a href="#扩充及边界：再看Observer" class="headerlink" title="扩充及边界：再看Observer"></a>扩充及边界：再看Observer</h2><p>前面我们讲的是主体思想及实现，我们贴的代码也是精简过的，真实实现要比这个复杂一些，有很多边界条件及系统的健壮性可用性需要考虑，考虑以下两个问题：</p>
+<ul>
+<li><p>如果一个watcher依赖于对象o的属性a，而a本身是一个对象：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> o = &#123;</span><br><span class="line">  <span class="attr">a</span>: &#123; <span class="attr">b</span>: <span class="number">2</span> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照我们前面贴出的代码，我们直接赋给<code>o.a</code>一个新的值是可以触发watcher的更新操作的，但是给<code>o.a</code>对象新增或删除一个属性却不会通知watcher：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 可以触发watcher更新</span></span><br><span class="line">o.<span class="property">a</span> = &#123; <span class="attr">c</span>: <span class="number">2</span> &#125; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 新增或删除字段都不会触发</span></span><br><span class="line">o.<span class="property">a</span>.<span class="property">c</span> = <span class="number">2</span></span><br><span class="line"><span class="keyword">delete</span> o.<span class="property">b</span></span><br></pre></td></tr></table></figure>
+
+<p>而一般情况下，后面2种操作我们也是需要触发的，所以需要提供给用户某种接口，使得新增或删除字段时也能触发更新</p>
+</li>
+<li><p>如果一个watcher依赖于对象o的属性a，而a本身是一个数组：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> o = &#123;</span><br><span class="line">  <span class="attr">a</span>: [<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同理，按照我们前面贴出的代码，我们直接赋给<code>o.a</code>一个新的值是可以触发watcher的更新操作的，但是给<code>o.a</code>对象新增或删除数组元素时却不会触发：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 可以触发watcher更新</span></span><br><span class="line">o.<span class="property">a</span> = [<span class="number">3</span>, <span class="number">4</span>] </span><br><span class="line"></span><br><span class="line"><span class="comment">// 新增或删除字段都不会触发</span></span><br><span class="line">o.<span class="property">a</span>.<span class="title function_">splice</span>(<span class="number">0</span>, <span class="number">1</span>, <span class="number">10</span>);</span><br><span class="line">o.<span class="property">a</span>.<span class="title function_">push</span>(<span class="number">3</span>)</span><br><span class="line">o.<span class="property">a</span>.<span class="title function_">pop</span>()</span><br><span class="line">...</span><br><span class="line"> </span><br></pre></td></tr></table></figure>
+
+<p>而一般情况下，我们是希望触发的，所以vue也需要对数组做些特殊处理，使得我们对数组的改动也能触发watcher的更新</p>
+</li>
+</ul>
+<p>这两种情况，vue作者都做了考虑，答案就在<code>Observer</code>中，我们重新看下它的构造函数未贴出的部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">Observer</span> &#123;</span><br><span class="line">  <span class="attr">dep</span>: <span class="title class_">Dep</span>; <span class="comment">// 收集依赖于整个value对象的watcher</span></span><br><span class="line"></span><br><span class="line">  <span class="title function_">constructor</span> (<span class="attr">value</span>: any) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">dep</span> = <span class="keyword">new</span> <span class="title class_">Dep</span>()</span><br><span class="line">    <span class="title function_">def</span>(value, <span class="string">&#x27;__ob__&#x27;</span>, <span class="variable language_">this</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(value)) &#123;</span><br><span class="line">      <span class="keyword">const</span> augment = hasProto</span><br><span class="line">        ? protoAugment</span><br><span class="line">        : copyAugment</span><br><span class="line">      <span class="title function_">augment</span>(value, arrayMethods, arrayKeys)</span><br><span class="line">      ...</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      ...</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面有两个重要的变化：</p>
+<ol>
+<li><p>Observer对象定义了一个dep字段，我们知道dep对象是用来收集watcher的，但是这里的dep不是和value对象的某个属性绑在一起，而是和整个value相关联，它起的作用正是<strong>收集依赖于整个value对象的所有watcher，当value增加删除字段(如果value是纯对象)或元素(如果value是数组)自动通知watcher更新</strong>。那什么叫<em>依赖于整个value对象呢</em>？很简单，就是value作为其他响应式对象的一个属性的值，而watcher依赖于这个属性，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> o = &#123;</span><br><span class="line">  <span class="attr">a</span>: &#123;</span><br><span class="line">    <span class="attr">b</span>: <span class="number">1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果w依赖于<code>o.a</code>，那么我们就说w依赖于o.a对应的整个对象：<code>&#123; b: 1 &#125;</code>。假设value &#x3D; o.a，则经过Observer构造函数后，value的值变成如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">__ob__</span>: &#123; </span><br><span class="line">      dep <span class="comment">// 收集依赖于外层a字段的watcher，即这里的w</span></span><br><span class="line">      value</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">b</span>: &#123;</span><br><span class="line">      dep <span class="comment">// 收集依赖于b字段的watcher</span></span><br><span class="line">      <span class="title function_">get</span>(<span class="params"></span>) &#123; &#125;,</span><br><span class="line">      <span class="title function_">set</span>(<span class="params"></span>) &#123; &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对数组的特殊处理</p>
+<p>同理，如果w依赖于一个数组字段value，那么这个数组经过observe之后，<code>value.__ob__.dep</code>也会收集这个w：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> o = &#123;</span><br><span class="line">  <span class="comment">// w依赖于o.a，value = o.a</span></span><br><span class="line">  <span class="attr">a</span>: [<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// observe(value)之后, value上多了__ob__这个属性：</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">__ob__</span>: &#123;</span><br><span class="line">    dep, <span class="comment">// 收集依赖于外层a字段的watcher，即这里的w</span></span><br><span class="line">    value</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>此外，我们还需要监听数组元素的变化，即当用户调用push，pop等修改数组的方法时会自动通知watcher，vue实现的原理是改写这些数组方法，并拦截调用，这就是下面这几行代码做的事：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> augment = hasProto</span><br><span class="line">        ? protoAugment</span><br><span class="line">        : copyAugment</span><br><span class="line">      <span class="title function_">augment</span>(value, arrayMethods, arrayKeys)</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>讲到这里，我们可以知道，一个对象是否是响应式的，只要看看它有没有<code>__ob__</code>属性。另外，有时还需要关注它是否是另一个响应式对象的某个属性的值，即这个对象是不是顶层对象，如果是顶层对象的话，它的<code>__ob__.dep</code>中是没有监听者的，vue组件中的<code>data</code>对象就是一个顶层对象</p>
+<h1 id="收集监听者"><a href="#收集监听者" class="headerlink" title="收集监听者"></a>收集监听者</h1><p>前面我们反复提到了<code>Dep</code>类(上面的dep都是它的实例)就是用来收集watcher的，这节我们仔细看看它和数据及watcher三者的关系，我们先看看较为简单的Dep</p>
+<h2 id="Dep"><a href="#Dep" class="headerlink" title="Dep"></a>Dep</h2><p>一个dep从属于某个响应式属性，里面包含了所有依赖于该属性的watcher，它的实现比较简单：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">class</span> <span class="title class_">Dep</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="attr">target</span>: ?<span class="title class_">Watcher</span>; <span class="comment">// 当前监听者：任何时刻最多只有一个监听者</span></span><br><span class="line">  <span class="attr">id</span>: number; <span class="comment">// dep的唯一标识</span></span><br><span class="line">  <span class="attr">subs</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Watcher</span>&gt;; <span class="comment">// 收集到的所有watcher</span></span><br><span class="line"></span><br><span class="line">  <span class="title function_">constructor</span> () &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">id</span> = uid++</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">subs</span> = []</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  addSub (<span class="attr">sub</span>: <span class="title class_">Watcher</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">subs</span>.<span class="title function_">push</span>(sub)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  removeSub (<span class="attr">sub</span>: <span class="title class_">Watcher</span>) &#123;</span><br><span class="line">    <span class="title function_">remove</span>(<span class="variable language_">this</span>.<span class="property">subs</span>, sub)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 收集watcher</span></span><br><span class="line">  depend () &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title class_">Dep</span>.<span class="property">target</span>) &#123;</span><br><span class="line">      <span class="comment">// 收集watcher动作：将当前watcher收集起来</span></span><br><span class="line">      <span class="title class_">Dep</span>.<span class="property">target</span>.<span class="title function_">addDep</span>(<span class="variable language_">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 通知watcher更新</span></span><br><span class="line">  notify () &#123;</span><br><span class="line">    <span class="keyword">const</span> subs = <span class="variable language_">this</span>.<span class="property">subs</span>.<span class="title function_">slice</span>()</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, l = subs.<span class="property">length</span>; i &lt; l; i++) &#123;</span><br><span class="line">      subs[i].<span class="title function_">update</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本没啥说的，唯一要注意的地方是在<code>depend</code>中，我们不是直接调用<code>addSub</code>将当前watcher收集起来，而是调用watcher的<code>addDep</code>方法，其实<code>watcher.addDep</code>内部最终也是调用<code>dep.addSub(this)</code>的，只是它还做了一些其他处理，这个我们后面会说。</p>
+<p>这里再强调一点：dep和watcher是多对多的关系：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540886749054.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>dep需要管理自己的watchers，通过<code>addSub</code>和<code>removeSub</code>随时更新watchers，但是这两个动作都是由watcher发起的。watcher也需要管理自己当前正在监听的所有数据，即管理和这些数据关联的deps。</p>
+<h2 id="watcher"><a href="#watcher" class="headerlink" title="watcher"></a>watcher</h2><p>终于讲到watcher了，我们把数据变成响应式之后，需要访问数据(调用数据属性的getter)才能将当前的访问者收集起来，这个访问动作就是由watcher发起的。简单地说，这个访问动作就是调用一个求值函数。所以构建一个watcher需要至少提供：</p>
+<ul>
+<li>求值函数</li>
+<li>回调函数：求值函数返回的值发生变化时回调</li>
+</ul>
+<p>另外，任何一个watcher都属于某个vue组件实例，</p>
+<p>此外，watcher还需要保存所依赖的所有deps，我们看看简化的源码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">class</span> <span class="title class_">Watcher</span> &#123;</span><br><span class="line">  <span class="attr">vm</span>: <span class="title class_">Component</span>; <span class="comment">// 所属的vue实例</span></span><br><span class="line">  <span class="attr">cb</span>: <span class="title class_">Function</span>; <span class="comment">// 当value发生变化时的回调函数</span></span><br><span class="line">  <span class="attr">id</span>: number; <span class="comment">// 标识watcher的唯一id</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 需要维护的依赖集</span></span><br><span class="line">  <span class="attr">deps</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Dep</span>&gt;; </span><br><span class="line">  <span class="attr">newDeps</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Dep</span>&gt;;</span><br><span class="line">  <span class="attr">depIds</span>: <span class="title class_">SimpleSet</span>;</span><br><span class="line">  <span class="attr">newDepIds</span>: <span class="title class_">SimpleSet</span>;</span><br><span class="line"></span><br><span class="line">  <span class="attr">getter</span>: <span class="title class_">Function</span>; <span class="comment">// 求值函数</span></span><br><span class="line">  <span class="attr">value</span>: any; <span class="comment">// 求值函数返回结果</span></span><br><span class="line"></span><br><span class="line">  <span class="title function_">constructor</span> (</span><br><span class="line">    <span class="attr">vm</span>: <span class="title class_">Component</span>,</span><br><span class="line">    <span class="attr">expOrFn</span>: string | <span class="title class_">Function</span>,</span><br><span class="line">    <span class="attr">cb</span>: <span class="title class_">Function</span>,</span><br><span class="line">    options?: ?<span class="title class_">Object</span>,</span><br><span class="line">    isRenderWatcher?: boolean</span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">vm</span> = vm</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// vm把自己的watchers保存起来</span></span><br><span class="line">    vm.<span class="property">_watchers</span>.<span class="title function_">push</span>(<span class="variable language_">this</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">cb</span> = cb</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">id</span> = ++uid <span class="comment">// uid for batching</span></span><br><span class="line">    </span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">deps</span> = []</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">newDeps</span> = []</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">depIds</span> = <span class="keyword">new</span> <span class="title class_">Set</span>()</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">newDepIds</span> = <span class="keyword">new</span> <span class="title class_">Set</span>()</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// parse expression for getter</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> expOrFn === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">getter</span> = expOrFn</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">getter</span> = <span class="title function_">parsePath</span>(expOrFn)</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 求值：触发收集操作</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = <span class="variable language_">this</span>.<span class="title function_">get</span>()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Subscriber interface.</span></span><br><span class="line"><span class="comment">   * Will be called when a dependency changes.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  update () &#123;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>精简后的watcher实现应该比较好理解了，<code>getter</code>保存了我们的求值函数，构造函数末尾我们通过<code>watcher.get</code>函数的调用触发求值函数，从而将watcher收集到所有的求值过程中遇到的dep中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Evaluate the getter, and re-collect dependencies.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">get () &#123;</span><br><span class="line">  <span class="title function_">pushTarget</span>(<span class="variable language_">this</span>) <span class="comment">// 将此watcher设置为当前watcher</span></span><br><span class="line">  <span class="keyword">let</span> value</span><br><span class="line">  <span class="keyword">const</span> vm = <span class="variable language_">this</span>.<span class="property">vm</span></span><br><span class="line">  <span class="comment">// 调用求值函数，启动收集过程</span></span><br><span class="line">  value = <span class="variable language_">this</span>.<span class="property">getter</span>.<span class="title function_">call</span>(vm, vm)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">popTarget</span>() <span class="comment">// 还原当前watcher</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="title function_">cleanupDeps</span>()</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> value</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数开始我们先将自己设置为当前watcher，然后调用求值函数，启动收集过程，这个过程中每次访问到响应式属性都会触发下面的调用过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data.getter() =&gt; dep.depend() =&gt; watcher.addDep() =&gt; (可选)dep.addSub()</span><br></pre></td></tr></table></figure>
+
+<p>我们来看看<code>watcher.addDep</code>，看看为什么不直接在<code>dep.depend</code>中调用<code>dep.addSub</code>，而需要绕一圈：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Add a dependency to this directive.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">addDep (<span class="attr">dep</span>: <span class="title class_">Dep</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> id = dep.<span class="property">id</span></span><br><span class="line">  <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="property">newDepIds</span>.<span class="title function_">has</span>(id)) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">newDepIds</span>.<span class="title function_">add</span>(id)</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">newDeps</span>.<span class="title function_">push</span>(dep)</span><br><span class="line">    <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="property">depIds</span>.<span class="title function_">has</span>(id)) &#123;</span><br><span class="line">      dep.<span class="title function_">addSub</span>(<span class="variable language_">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在构造函数中我们看到watcher定义了下面四个字段来管理依赖，它们的意义如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 保存当前的依赖集   </span></span><br><span class="line"><span class="attr">newDeps</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Dep</span>&gt;;</span><br><span class="line"><span class="attr">newDepIds</span>: <span class="title class_">SimpleSet</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存上一次求值时的依赖集</span></span><br><span class="line"><span class="attr">deps</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Dep</span>&gt;;</span><br><span class="line"><span class="attr">depIds</span>: <span class="title class_">SimpleSet</span>;</span><br></pre></td></tr></table></figure>
+
+<p>为什么要这多呢？其实这是用来避免将一个watcher重复收集在同一个dep中的。假设<code>getter</code>函数如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">fn</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> o.<span class="property">a</span> + o.<span class="property">a</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>o.a是一个响应式数据，如果我们不做处理的话，o.a.dep中将包含2个一样的watcher，这是为了在同一次求值过程中避免重复收集依赖；还有一种情况需要考虑：watcher的多次求值，这种情况我们同样需要避免重复收集watcher。所以我们在watcher中不但要保存当前求值正在收集的依赖(newDeps, newDepIds)，还需要保存上一次求值收集的依赖，每次求完值之后，我们会把newDeps赋值给deps，并把newDeps清空，这是通过在求值最后调用cleanupDeps实现的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cleanupDeps () &#123;</span><br><span class="line">  <span class="keyword">let</span> i = <span class="variable language_">this</span>.<span class="property">deps</span>.<span class="property">length</span></span><br><span class="line">  <span class="keyword">while</span> (i--) &#123;</span><br><span class="line">    <span class="keyword">const</span> dep = <span class="variable language_">this</span>.<span class="property">deps</span>[i]</span><br><span class="line">    <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="property">newDepIds</span>.<span class="title function_">has</span>(dep.<span class="property">id</span>)) &#123;</span><br><span class="line">      dep.<span class="title function_">removeSub</span>(<span class="variable language_">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> tmp = <span class="variable language_">this</span>.<span class="property">depIds</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">depIds</span> = <span class="variable language_">this</span>.<span class="property">newDepIds</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">newDepIds</span> = tmp</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">newDepIds</span>.<span class="title function_">clear</span>()</span><br><span class="line">  tmp = <span class="variable language_">this</span>.<span class="property">deps</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">deps</span> = <span class="variable language_">this</span>.<span class="property">newDeps</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">newDeps</span> = tmp</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">newDeps</span>.<span class="property">length</span> = <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数的逻辑分成两部分：后面的部分就是newDeps赋值给deps，并把newDeps清空；前一部分是解除废弃的依赖，就是说如果watcher不再依赖于某个数据了，需要把watcher从这个数据的依赖集中去掉：<code>dep.removeSub</code>。</p>
+<h3 id="vue中watcher的分类"><a href="#vue中watcher的分类" class="headerlink" title="vue中watcher的分类"></a>vue中watcher的分类</h3><p>在watcher的构造函数中，有几个实例属性我们没有讲到，这牵涉到watcher的分类，我们来看看：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line"><span class="title function_">constructor</span> (</span><br><span class="line">  <span class="attr">vm</span>: <span class="title class_">Component</span>,</span><br><span class="line">  <span class="attr">expOrFn</span>: string | <span class="title class_">Function</span>,</span><br><span class="line">  <span class="attr">cb</span>: <span class="title class_">Function</span>,</span><br><span class="line">  options?: ?<span class="title class_">Object</span>,</span><br><span class="line">  isRenderWatcher?: boolean</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">vm</span> = vm</span><br><span class="line">  <span class="keyword">if</span> (isRenderWatcher) &#123;</span><br><span class="line">    vm.<span class="property">_watcher</span> = <span class="variable language_">this</span></span><br><span class="line">  &#125;</span><br><span class="line">  vm.<span class="property">_watchers</span>.<span class="title function_">push</span>(<span class="variable language_">this</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// options</span></span><br><span class="line">  <span class="keyword">if</span> (options) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">user</span> = !!options.<span class="property">user</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">computed</span> = !!options.<span class="property">computed</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">user</span> = <span class="variable language_">this</span>.<span class="property">computed</span> = <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参数<code>isRenderWatcher</code>表示watcher是否是渲染watcher，我们知道每个vue实例都有一个渲染函数，它监控实例数据的变化并重新渲染dom，渲染watcher保存在vue实例的<code>_watcher</code>中，渲染watcher在src&#x2F;core&#x2F;instance&#x2F;lifecycle.js中创建，大家有兴趣可以看看：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// lifecycle.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">mountComponent</span> (</span><br><span class="line">  <span class="attr">vm</span>: <span class="title class_">Component</span>,</span><br><span class="line">  <span class="attr">el</span>: ?<span class="title class_">Element</span>,</span><br><span class="line">  hydrating?: boolean</span><br><span class="line">): <span class="title class_">Component</span> &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// we set this to vm._watcher inside the watcher&#x27;s constructor</span></span><br><span class="line">  <span class="comment">// since the watcher&#x27;s initial patch may call $forceUpdate (e.g. inside child</span></span><br><span class="line">  <span class="comment">// component&#x27;s mounted hook), which relies on vm._watcher being already defined</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Watcher</span>(vm, updateComponent, noop, &#123;</span><br><span class="line">    before () &#123;</span><br><span class="line">      <span class="keyword">if</span> (vm.<span class="property">_isMounted</span>) &#123;</span><br><span class="line">        <span class="title function_">callHook</span>(vm, <span class="string">&#x27;beforeUpdate&#x27;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, <span class="literal">true</span> <span class="comment">/* isRenderWatcher */</span>)</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外两个属性<code>user</code>和<code>computed</code>的意义分别如下：</p>
+<ul>
+<li>user：标识是否是用户定义的watcher，即用户通过<code>vm.$watch</code>函数或watch选项定义的watcher</li>
+<li>computed：标识是否是计算属性watcher，即系统自动为计算属性创建的watcher，它监听计算属性所依赖的数据的变化并更新计算属性的值</li>
+</ul>
+<h2 id="再看getter"><a href="#再看getter" class="headerlink" title="再看getter"></a>再看getter</h2><p>看了dep和watcher的实现，我们对依赖收集的整个过程应该比较清楚了，下面我们再看看getter中省略的部分：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">defineReactive</span> (</span><br><span class="line">  <span class="attr">obj</span>: <span class="title class_">Object</span>,</span><br><span class="line">  <span class="attr">key</span>: string,</span><br><span class="line">  <span class="attr">val</span>: any,</span><br><span class="line">  customSetter?: ?<span class="title class_">Function</span>,</span><br><span class="line">  shallow?: boolean</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="keyword">const</span> dep = <span class="keyword">new</span> <span class="title class_">Dep</span>()</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> childOb = !shallow &amp;&amp; <span class="title function_">observe</span>(val)</span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(obj, key, &#123;</span><br><span class="line">    <span class="attr">enumerable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">configurable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">get</span>: <span class="keyword">function</span> <span class="title function_">reactiveGetter</span> () &#123;</span><br><span class="line">      <span class="keyword">const</span> value = getter ? getter.<span class="title function_">call</span>(obj) : val</span><br><span class="line">      <span class="keyword">if</span> (<span class="title class_">Dep</span>.<span class="property">target</span>) &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">if</span> (childOb) &#123;</span><br><span class="line">          childOb.<span class="property">dep</span>.<span class="title function_">depend</span>()</span><br><span class="line">          <span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(value)) &#123;</span><br><span class="line">            <span class="title function_">dependArray</span>(value)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> value</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们重点看看<code>if (childOb)</code>里面的代码，我们先看看childOb是怎么来的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> childOb = !shallow &amp;&amp; <span class="title function_">observe</span>(val)</span><br></pre></td></tr></table></figure>
+
+<p>如果val是一个对象，我们需要把这个对象也变成响应式，并把<code>val.__ob__</code>保存在childOb中。前面说过，如果一个watcher依赖于这个字段(key)，那么它也依赖于整个对象(val)，所以把它也收集到val中：<code>childOb.dep.depend()</code>。</p>
+<p>除了这个之外，还有一段代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(value)) &#123;</span><br><span class="line">    <span class="title function_">dependArray</span>(value)</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的意思是，如果这个字段对应的值是一个数组，需要再调用一个函数：<code>dependArray</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">dependArray</span> (<span class="attr">value</span>: <span class="title class_">Array</span>&lt;any&gt;) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> e, i = <span class="number">0</span>, l = value.<span class="property">length</span>; i &lt; l; i++) &#123;</span><br><span class="line">    e = value[i]</span><br><span class="line">    e &amp;&amp; e.<span class="property">__ob__</span> &amp;&amp; e.<span class="property">__ob__</span>.<span class="property">dep</span>.<span class="title function_">depend</span>()</span><br><span class="line">    <span class="keyword">if</span> (<span class="title class_">Array</span>.<span class="title function_">isArray</span>(e)) &#123;</span><br><span class="line">      <span class="title function_">dependArray</span>(e)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数的意思很明显：递归遍历数组的每个元素，如果这个元素也是个响应式对象，那么这个元素也需要把当前的watcher收集起来，举例来说：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> o = &#123;</span><br><span class="line">  <span class="attr">a</span>: [&#123; <span class="attr">b</span>: <span class="number">1</span> &#125;, &#123; <span class="attr">c</span>: <span class="number">2</span> &#125;]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果w依赖于<code>o.a</code>, 且o.a的每个元素都是响应式对象，那么这些对象新增或删除元素(通过vue提供的api)也会引起w的更新：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Vue</span>.<span class="title function_">set</span>(o.<span class="property">a</span>[<span class="number">0</span>], <span class="string">&#x27;key1&#x27;</span>, <span class="string">&#x27;val1&#x27;</span>) <span class="comment">// 引起w的更新</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>响应式数据需要通过dep收集监听者(watcher)，而watcher也需要收集并管理其依赖的所有依赖集(dep)，这个过程都是由watcher的求值发起的，这个过程中需要避免重复收集依赖</p>
+<h1 id="通知监听者更新"><a href="#通知监听者更新" class="headerlink" title="通知监听者更新"></a>通知监听者更新</h1><p>响应式系统的第三步便是修改数据，通知watcher更新，调用流程如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data.setter() -&gt; dep.notify() -&gt; watcher.update()</span><br></pre></td></tr></table></figure>
+
+<p>我们先看看setter</p>
+<h2 id="setter"><a href="#setter" class="headerlink" title="setter"></a>setter</h2><p>简略代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">defineReactive</span> (</span><br><span class="line">  <span class="attr">obj</span>: <span class="title class_">Object</span>,</span><br><span class="line">  <span class="attr">key</span>: string,</span><br><span class="line">  <span class="attr">val</span>: any,</span><br><span class="line">  customSetter?: ?<span class="title class_">Function</span>,</span><br><span class="line">  shallow?: boolean</span><br><span class="line">) &#123;</span><br><span class="line">  <span class="keyword">const</span> dep = <span class="keyword">new</span> <span class="title class_">Dep</span>()</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">let</span> childOb = !shallow &amp;&amp; <span class="title function_">observe</span>(val)</span><br><span class="line">  <span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(obj, key, &#123;</span><br><span class="line">    <span class="attr">enumerable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">configurable</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">set</span>: <span class="keyword">function</span> <span class="title function_">reactiveSetter</span> (newVal) &#123;</span><br><span class="line">      ...</span><br><span class="line">      childOb = !shallow &amp;&amp; <span class="title function_">observe</span>(newVal)</span><br><span class="line">      dep.<span class="title function_">notify</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要代码就两句，第二句<code>dep.notify()</code>就是通知所有watcher更新，没啥说的。第一句<code>childOb = !shallow &amp;&amp; observe(newVal)</code>在getter中也见过：如果我们新附的值也是一个对象，那没说的，需要把这个新对象也变成响应式</p>
+<h2 id="dep-notify"><a href="#dep-notify" class="headerlink" title="dep.notify"></a>dep.notify</h2><p>dep中保存了所有依赖的watcher，数据变化时挨个通知它们就行了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// dep.js</span></span><br><span class="line">notify () &#123;</span><br><span class="line">  <span class="comment">// stabilize the subscriber list first</span></span><br><span class="line">  <span class="keyword">const</span> subs = <span class="variable language_">this</span>.<span class="property">subs</span>.<span class="title function_">slice</span>()</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>, l = subs.<span class="property">length</span>; i &lt; l; i++) &#123;</span><br><span class="line">    subs[i].<span class="title function_">update</span>()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="watcher-update"><a href="#watcher-update" class="headerlink" title="watcher.update"></a>watcher.update</h2><p>watcher怎么更新很重要的一件事，有不少问题需要考虑：</p>
+<ul>
+<li>同步还是异步</li>
+<li>一个watcher的多个依赖数据同时修改，如何保证它只更新一次？</li>
+<li>多个watcher需要更新，它们的更新顺序有没有要求？</li>
+<li>watcher在更新过程中又触发了新的更新(包含它自己的)怎么处理？</li>
+</ul>
+<p>我们一边看代码一边讲解这些问题是如何处理的，首先看看入口函数：<code>watcher.update</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line">update () &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">computed</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">sync</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">run</span>()</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_">queueWatcher</span>(<span class="variable language_">this</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先不考虑this.computed为true的情况，后面会单独讲计算属性。<code>this.sync</code>标识watcher是否是同步的，如果是，马上执行更新操作，这个标识可以在创建watcher的时候指定；如果不是，我们把watcher缓存起来，后面统一<strong>异步</strong>更新，所以watcher的更新一般是异步的，这是为了效率考虑。</p>
+<p>无论是异步还是同步，最后都会调用<code>watcher.run</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line">run () &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">active</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">getAndInvoke</span>(<span class="variable language_">this</span>.<span class="property">cb</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>active</code>标识watcher是否还有效，如果有效，会调用<code>watcher.getAndInvoke</code>，顾名思义，这个函数就是重新求值并调用回调函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line">getAndInvoke (<span class="attr">cb</span>: <span class="title class_">Function</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> value = <span class="variable language_">this</span>.<span class="title function_">get</span>()</span><br><span class="line">  <span class="keyword">if</span> (</span><br><span class="line">    value !== <span class="variable language_">this</span>.<span class="property">value</span> ||</span><br><span class="line">    <span class="comment">// Deep watchers and watchers on Object/Arrays should fire even</span></span><br><span class="line">    <span class="comment">// when the value is the same, because the value may</span></span><br><span class="line">    <span class="comment">// have mutated.</span></span><br><span class="line">    <span class="title function_">isObject</span>(value) ||</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">deep</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="comment">// set new value</span></span><br><span class="line">    <span class="keyword">const</span> oldValue = <span class="variable language_">this</span>.<span class="property">value</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = value</span><br><span class="line">    cb.<span class="title function_">call</span>(<span class="variable language_">this</span>.<span class="property">vm</span>, value, oldValue)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先求出最新的值，然后判断该不该调用回调函数，判断条件有三个：</p>
+<ol>
+<li>值发生了变化</li>
+<li>值没变化，但是值是一个对象，说明对象内部发生了变化</li>
+<li>deep为true</li>
+</ol>
+<p>这三种情况都应该调用回调函数</p>
+<h3 id="异步批量更新"><a href="#异步批量更新" class="headerlink" title="异步批量更新"></a>异步批量更新</h3><p>入口：<code>queueWatcher</code>:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scheduler.js</span></span><br><span class="line"><span class="keyword">const</span> <span class="attr">queue</span>: <span class="title class_">Array</span>&lt;<span class="title class_">Watcher</span>&gt; = [] <span class="comment">// 缓存所有待更新的watcher的队列</span></span><br><span class="line"><span class="keyword">let</span> <span class="attr">has</span>: &#123; [<span class="attr">key</span>: number]: ?<span class="literal">true</span> &#125; = &#123;&#125; <span class="comment">// 保证队列中watcher不会重复</span></span><br><span class="line"><span class="keyword">let</span> waiting = <span class="literal">false</span> <span class="comment">// 是否已经安排watcher批量更新</span></span><br><span class="line"><span class="keyword">let</span> flushing = <span class="literal">false</span> <span class="comment">// watcher的批量更新是否正在进行</span></span><br><span class="line"><span class="keyword">let</span> index = <span class="number">0</span> <span class="comment">// 当前正在进行更新的watcher在queue中的下标</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">queueWatcher</span> (<span class="attr">watcher</span>: <span class="title class_">Watcher</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> id = watcher.<span class="property">id</span></span><br><span class="line">  <span class="keyword">if</span> (has[id] == <span class="literal">null</span>) &#123;</span><br><span class="line">    has[id] = <span class="literal">true</span></span><br><span class="line">    <span class="keyword">if</span> (!flushing) &#123;</span><br><span class="line">      queue.<span class="title function_">push</span>(watcher)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// if already flushing, splice the watcher based on its id</span></span><br><span class="line">      <span class="comment">// if already past its id, it will be run next immediately.</span></span><br><span class="line">      <span class="keyword">let</span> i = queue.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">      <span class="keyword">while</span> (i &gt; index &amp;&amp; queue[i].<span class="property">id</span> &gt; watcher.<span class="property">id</span>) &#123;</span><br><span class="line">        i--</span><br><span class="line">      &#125;</span><br><span class="line">      queue.<span class="title function_">splice</span>(i + <span class="number">1</span>, <span class="number">0</span>, watcher)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// queue the flush</span></span><br><span class="line">    <span class="keyword">if</span> (!waiting) &#123;</span><br><span class="line">      waiting = <span class="literal">true</span></span><br><span class="line">      <span class="title function_">nextTick</span>(flushSchedulerQueue)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数回答了我们前面关于<code>watcher.update</code>的第二和第四个问题，首先我们用<code>has</code>对象记录所有待更新的watcher是否已经放入更新队列，这样保证同一个watcher被多次触发更新时只会进入队列一次。</p>
+<p><code>flushing</code>标识批量更新是否正在进行，如果不在进行，直接将watcher放入更新队列末尾；否则，将watcher按id大小放入队列中的对应位置(后面会提到，队列在批量更新之前会先按id升序排序)，就是说，更新过程中可能有watcher被不断加入队列，我们要确保中途加进来的watcher也能在本次批量中得到更新。</p>
+<p><code>waiting</code>标识watcher的批量更新这个整体动作是否已经放入javascript的异步队列，防止这个动作被触发多次，你可以理解为和防止按钮被多次点击而采取的在首次点击都先disable，事件处理完再enable的逻辑差不多。</p>
+<p>这里的<code>nextTick(cb)</code>你可以简单地理解为<code>setTimeout(cb, 0)</code>，真正的批量更新操作在<code>flushSchedulerQueue</code>中, 代码简化如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// scheduler.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">flushSchedulerQueue</span> () &#123;</span><br><span class="line">  flushing = <span class="literal">true</span></span><br><span class="line">  <span class="keyword">let</span> watcher, id</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Sort queue before flush.</span></span><br><span class="line">  <span class="comment">// This ensures that:</span></span><br><span class="line">  <span class="comment">// 1. Components are updated from parent to child. (because parent is always</span></span><br><span class="line">  <span class="comment">//    created before the child)</span></span><br><span class="line">  <span class="comment">// 2. A component&#x27;s user watchers are run before its render watcher (because</span></span><br><span class="line">  <span class="comment">//    user watchers are created before the render watcher)</span></span><br><span class="line">  <span class="comment">// 3. If a component is destroyed during a parent component&#x27;s watcher run,</span></span><br><span class="line">  <span class="comment">//    its watchers can be skipped.</span></span><br><span class="line">  queue.<span class="title function_">sort</span>(<span class="function">(<span class="params">a, b</span>) =&gt;</span> a.<span class="property">id</span> - b.<span class="property">id</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// do not cache length because more watchers might be pushed</span></span><br><span class="line">  <span class="comment">// as we run existing watchers</span></span><br><span class="line">  <span class="keyword">for</span> (index = <span class="number">0</span>; index &lt; queue.<span class="property">length</span>; index++) &#123;</span><br><span class="line">    watcher = queue[index]</span><br><span class="line">    <span class="keyword">if</span> (watcher.<span class="property">before</span>) &#123;</span><br><span class="line">      watcher.<span class="title function_">before</span>()</span><br><span class="line">    &#125;</span><br><span class="line">    id = watcher.<span class="property">id</span></span><br><span class="line">    has[id] = <span class="literal">null</span></span><br><span class="line">    watcher.<span class="title function_">run</span>()</span><br><span class="line">    <span class="comment">// in dev build, check and stop circular updates.</span></span><br><span class="line">    <span class="keyword">if</span> (process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span> &amp;&amp; has[id] != <span class="literal">null</span>) &#123;</span><br><span class="line">      circular[id] = (circular[id] || <span class="number">0</span>) + <span class="number">1</span></span><br><span class="line">      <span class="keyword">if</span> (circular[id] &gt; <span class="variable constant_">MAX_UPDATE_COUNT</span>) &#123;</span><br><span class="line">        <span class="title function_">warn</span>(</span><br><span class="line">          <span class="string">&#x27;You may have an infinite update loop &#x27;</span> + (</span><br><span class="line">            watcher.<span class="property">user</span></span><br><span class="line">              ? <span class="string">`in watcher with expression &quot;<span class="subst">$&#123;watcher.expression&#125;</span>&quot;`</span></span><br><span class="line">              : <span class="string">`in a component render function.`</span></span><br><span class="line">          ),</span><br><span class="line">          watcher.<span class="property">vm</span></span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// keep copies of post queues before resetting state</span></span><br><span class="line">  <span class="keyword">const</span> activatedQueue = activatedChildren.<span class="title function_">slice</span>()</span><br><span class="line">  <span class="keyword">const</span> updatedQueue = queue.<span class="title function_">slice</span>()</span><br><span class="line"></span><br><span class="line">  <span class="title function_">resetSchedulerState</span>()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// call component updated and activated hooks</span></span><br><span class="line">  <span class="title function_">callActivatedHooks</span>(activatedQueue)</span><br><span class="line">  <span class="title function_">callUpdatedHooks</span>(updatedQueue)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先将<code>flushing</code>置为true，表示批量更新正在进行。</p>
+<p>然后对watcher按id进行升序排序，排序的原因注释里已经写了，这牵涉到其他模块的知识，大家先可以不必深究。</p>
+<p>之后从队列中依次取出watcher调用<code>run</code>函数进行更新，<code>before</code>是创建watcher时提供的一个函数选项，表示在更新在之前的回调。这里还做了一个循环触发更新的监测，我们知道在队列的更新中不断有watcher被加入队列中，如果同一个watcher被加入很多次，有可能就是一个死循环，需要监测出来提醒用户</p>
+<p>队列更新完之后再做一些更新后的回调，如果有的话</p>
+<h1 id="computed属性实现原理"><a href="#computed属性实现原理" class="headerlink" title="computed属性实现原理"></a>computed属性实现原理</h1><p>我们知道计算属性和普通方法的区别就是计算属性不会每次访问都重新求值，而是它会监听求值过程中的数据的变化，有变化时才会重新求值，就这点来说，它和watcher的性质是一样的，不难想到计算属性是使用watcher实现的，每个计算属性内部都对应一个watcher，其<code>computed</code>属性为true。</p>
+<p>除此之外，计算属性还可以被其他watcher所依赖，这是它和普通方法的另一个重要区别。</p>
+<p>基于这两点，computed watcher的实现和普通watcher有些不一样，我们来看看watcher作了哪些特殊处理，首先来看看构造函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line"><span class="title function_">constructor</span> (</span><br><span class="line">    <span class="attr">vm</span>: <span class="title class_">Component</span>,</span><br><span class="line">    <span class="attr">expOrFn</span>: string | <span class="title class_">Function</span>,</span><br><span class="line">    <span class="attr">cb</span>: <span class="title class_">Function</span>,</span><br><span class="line">    options?: ?<span class="title class_">Object</span>,</span><br><span class="line">    isRenderWatcher?: boolean</span><br><span class="line">  ) &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">dirty</span> = <span class="variable language_">this</span>.<span class="property">computed</span> <span class="comment">// for computed watchers</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">computed</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = <span class="literal">undefined</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">dep</span> = <span class="keyword">new</span> <span class="title class_">Dep</span>()</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = <span class="variable language_">this</span>.<span class="title function_">get</span>()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从构造函数可以看出2点：</p>
+<ul>
+<li><p>computed watcher还多了一个<code>dirty</code>属性，用来标识watcher是否需要重新求值</p>
+</li>
+<li><p>computed watcher在构造函数中不会马上求值以收集依赖，而是把value置为<code>undefined</code>且创建了一个Dep实例：<code>this.dep = new Dep()</code>。如果有其他的watcher依赖于计算属性的值，这个dep就是用来收集这些watcher的：</p>
+<p><img src="/../images/1541470064217.png"></p>
+</li>
+</ul>
+<h2 id="计算属性的初始化简介"><a href="#计算属性的初始化简介" class="headerlink" title="计算属性的初始化简介"></a>计算属性的初始化简介</h2><p>这里我们省略了一些细节，具体大家可以参考src&#x2F;core&#x2F;instance&#x2F;state.js中的<code>initComputed</code>函数</p>
+<p>假设我们在vue实例上定义了计算属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">computed</span>: &#123;</span><br><span class="line">  <span class="title function_">a</span>(<span class="params"></span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>经过初始化后，系统为每个计算属性定义了一个watcher，所有的计算属性watcher保存在<code>_computedWatchers</code>中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="property">_computedWatchers</span> = &#123;</span><br><span class="line">  <span class="attr">a</span>: <span class="keyword">new</span> <span class="title class_">Watcher</span>(</span><br><span class="line">        vm,</span><br><span class="line">        getter || noop, <span class="comment">// 计算属性的求值函数</span></span><br><span class="line">        noop,</span><br><span class="line">        &#123; <span class="attr">computed</span>: <span class="literal">true</span> &#125;</span><br><span class="line">      )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>并且在vue实例上定义了一个同名属性：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">defineProperty</span>(vm, <span class="string">&#x27;a&#x27;</span>, &#123;</span><br><span class="line">  <span class="attr">enumerable</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="attr">configurable</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="attr">get</span>: <span class="keyword">function</span> <span class="title function_">computedGetter</span> () &#123;</span><br><span class="line">    <span class="keyword">const</span> watcher = <span class="variable language_">this</span>.<span class="property">_computedWatchers</span> &amp;&amp; <span class="variable language_">this</span>.<span class="property">_computedWatchers</span>[a]</span><br><span class="line">    <span class="keyword">if</span> (watcher) &#123;</span><br><span class="line">      watcher.<span class="title function_">depend</span>()</span><br><span class="line">      <span class="keyword">return</span> watcher.evaluate()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">set</span>: setter <span class="comment">// 可选</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h2 id="计算属性的求值"><a href="#计算属性的求值" class="headerlink" title="计算属性的求值"></a>计算属性的求值</h2><p>在watcher的构造函数中我们看到，computed watcher没有马上求值，而是在我们访问计算属性时才开始求值。我们通过vue实例访问计算属性的时候(如vm.a)，进入get函数，下面两句代码得以执行：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">watcher.<span class="title function_">depend</span>()</span><br><span class="line"><span class="keyword">return</span> watcher.evaluate()</span><br></pre></td></tr></table></figure>
+
+<p>第一句代码用来收集对计算属性本身的值的依赖：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Depend on this watcher. Only for computed property watchers.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">depend () &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">dep</span> &amp;&amp; <span class="title class_">Dep</span>.<span class="property">target</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">dep</span>.<span class="title function_">depend</span>()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注释已经写得很清楚了</p>
+<p>第二句代码就是计算属性的求值，返回给访问者：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Evaluate and return the value of the watcher.</span></span><br><span class="line"><span class="comment"> * This only gets called for computed property watchers.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">evaluate () &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">dirty</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">value</span> = <span class="variable language_">this</span>.<span class="title function_">get</span>()</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">dirty</span> = <span class="literal">false</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">value</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看出它是惰性求值的，只有dirty为true，说明计算属性需要重新求值了，才重新求值，否则返回之前的值</p>
+<h2 id="computed-watcher的更新：再看update"><a href="#computed-watcher的更新：再看update" class="headerlink" title="computed watcher的更新：再看update"></a>computed watcher的更新：再看update</h2><p>computed watcher的更新机制也不一样，我们再来看看：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// watcher.js</span></span><br><span class="line">update () &#123;</span><br><span class="line">  <span class="comment">/* istanbul ignore else */</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">computed</span>) &#123;</span><br><span class="line">    <span class="comment">// A computed property watcher has two modes: lazy and activated.</span></span><br><span class="line">    <span class="comment">// It initializes as lazy by default, and only becomes activated when</span></span><br><span class="line">    <span class="comment">// it is depended on by at least one subscriber, which is typically</span></span><br><span class="line">    <span class="comment">// another computed property or a component&#x27;s render function.</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="property">dep</span>.<span class="property">subs</span>.<span class="property">length</span> === <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">// In lazy mode, we don&#x27;t want to perform computations until necessary,</span></span><br><span class="line">      <span class="comment">// so we simply mark the watcher as dirty. The actual computation is</span></span><br><span class="line">      <span class="comment">// performed just-in-time in this.evaluate() when the computed property</span></span><br><span class="line">      <span class="comment">// is accessed.</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="property">dirty</span> = <span class="literal">true</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// In activated mode, we want to proactively perform the computation</span></span><br><span class="line">      <span class="comment">// but only notify our subscribers when the value has indeed changed.</span></span><br><span class="line">      <span class="variable language_">this</span>.<span class="title function_">getAndInvoke</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">dep</span>.<span class="title function_">notify</span>()</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是计算属性watcher，我们看看第一个if语句：<code>if (this.dep.subs.length === 0)</code>，它说明没有其他watcher依赖于这个计算属性，这个时候我们只是设置一些dirty，表示计算属性要重新求值，后面访问计算属性的时候它就会重新求值(见watcher.evaluate)；否则的话说明有其他watcher依赖于此计算属性，这个时候我们应该马上求值并通知其他watcher去更新</p>
+<h1 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h1><p>到此为止，整个响应式系统就差不多讲完了，其实基本思路很简单，但是细节多，但愿讲清楚了；特别感谢：</p>
+<p><a target="_blank" rel="noopener" href="http://hcysun.me/vue-design/art/%E7%9A%84%E4%BD%9C%E8%80%85%EF%BC%8C%E5%85%B6%E4%BB%96%E4%BB%96%E5%86%99%E5%BE%97%E6%9B%B4%E8%AF%A6%E7%BB%86%EF%BC%8C%E6%88%91%E8%BF%99%E9%87%8C%E5%8F%AA%E6%98%AF%E7%BB%93%E5%90%88%E8%87%AA%E5%B7%B1%E7%9A%84%E7%90%86%E8%A7%A3%E9%87%8D%E6%96%B0%E6%80%BB%E7%BB%93%E4%BA%86%E4%B8%80%E9%81%8D%EF%BC%8C%E5%A4%A7%E5%AE%B6%E8%A6%81%E7%9C%8B%E6%9B%B4%E5%A4%9A%E7%BB%86%E8%8A%82%E7%9A%84%E8%AF%9D%E5%8F%AF%E4%BB%A5%E5%8E%BB%E7%9C%8B%E7%9C%8B">http://hcysun.me/vue-design/art/的作者，其他他写得更详细，我这里只是结合自己的理解重新总结了一遍，大家要看更多细节的话可以去看看</a></p>
+<p>看了一些最新的源码，有些地方改了，我这个是基于2.5.17-beta.0，最新的是正式版2.5.17，回头有时间看了再修改下</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.568Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vue/" rel="tag">vue</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-reactive/&title=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-reactive/&title=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-reactive/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-reactive/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-reactive/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/property-attribtes-tips/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">property descriptor的几个疑难点</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/pwa-clients-claim-vs-self-skipWaiting/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">service worker之clients.claim() vs self.skipWaiting()</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/vue-reactive/&title=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/vue-reactive/&title=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/vue-reactive/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一文读懂vue响应式系统实现过程》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/vue-reactive/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/vue-reactive/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/vue-reactive/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

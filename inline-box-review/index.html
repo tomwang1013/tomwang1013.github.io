@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>行内布局的一点新的感悟 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="css">
+    <meta name="description" content="行内布局是css的难点，主要涉及line-height，vertical-align，font-size这几个属性，一个简单的”行内居中对齐”就常常让人抓狂，因为行内不止有文字，还有图片、icon font及inline-block元素，它们混在一起会导致各种像素偏差，如果不深入理解其中原理的话，调起来只有碰运气了。还好，已经有前辈帮我们做了很深入浅出的总结，最近又重温了一遍张鑫旭同学的《CSS世">
+<meta property="og:type" content="article">
+<meta property="og:title" content="行内布局的一点新的感悟">
+<meta property="og:url" content="http://tomwang1013.github.io/inline-box-review/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="行内布局是css的难点，主要涉及line-height，vertical-align，font-size这几个属性，一个简单的”行内居中对齐”就常常让人抓狂，因为行内不止有文字，还有图片、icon font及inline-block元素，它们混在一起会导致各种像素偏差，如果不深入理解其中原理的话，调起来只有碰运气了。还好，已经有前辈帮我们做了很深入浅出的总结，最近又重温了一遍张鑫旭同学的《CSS世">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/content-area.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539837492653.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539838192059.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539838404195.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539838552222.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539838743672.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1539841495253.png">
+<meta property="article:published_time" content="2018-10-18T01:41:08.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.560Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="css">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/content-area.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">行内布局的一点新的感悟</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">行内布局的一点新的感悟</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-10-18T01:41:08.000Z" itemprop="datePublished" class="page-time">
+  2018-10-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E5%87%A0%E4%B8%AA%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="post-toc-number">1.</span> <span class="post-toc-text">几个基础概念</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E8%A1%8C%E5%86%85%E5%AF%B9%E9%BD%90"><span class="post-toc-number">2.</span> <span class="post-toc-text">行内对齐</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-inline-box-review"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">行内布局的一点新的感悟</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-10-18 09:41:08" datetime="2018-10-18T01:41:08.000Z"  itemprop="datePublished">2018-10-18</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>行内布局是css的难点，主要涉及<code>line-height</code>，<code>vertical-align</code>，<code>font-size</code>这几个属性，一个简单的”行内居中对齐”就常常让人抓狂，因为行内不止有文字，还有图片、icon font及<code>inline-block</code>元素，它们混在一起会导致各种像素偏差，如果不深入理解其中原理的话，调起来只有碰运气了。还好，已经有前辈帮我们做了很深入浅出的总结，最近又重温了一遍张鑫旭同学的《CSS世界》的第五章：内联元素与流，有了一些新的感悟，特此记录一下</p>
+<h1 id="几个基础概念"><a href="#几个基础概念" class="headerlink" title="几个基础概念"></a>几个基础概念</h1><ul>
+<li><p>content area：内容区域</p>
+<p>对文字来说，其选中的背景区域(蓝底白字)可以看成内容区域：</p>
+<p><img src="/../images/content-area.png" alt="1539828317226"></p>
+<p>对图片来说，内容区域可以看成是它本身</p>
+</li>
+<li><p>inline-box：内联盒子</p>
+<p>内联盒子是行内的一段文字构成的盒子，如果这段文字被内联元素(如<code>em</code>,<code>span</code>等)包含，就是”内联盒子”，否则就是”匿名内联盒子”</p>
+</li>
+<li><p>line-box：行框</p>
+<p>每一行就是就是一个行框，里面有多个内联盒子</p>
+</li>
+<li><p>containing box：包含盒子</p>
+<p>包含盒子里面有多个行框</p>
+</li>
+</ul>
+<h1 id="行内对齐"><a href="#行内对齐" class="headerlink" title="行内对齐"></a>行内对齐</h1><p>我们几乎每天都在做行内对齐，都在用<code>vertical-align</code>，但是大家有没有想过：既然是对齐，那肯定有参照物和被参照物，即谁和谁对齐。结合书上的讲解及自己的测试，我得出了下面的结论：</p>
+<ol>
+<li><p>谁和谁对齐？</p>
+<p>指的是内联盒子与行框内的默认基线对齐：每个内联盒子都属于某个行框，而每个行框都有一条默认基线，即行框内匿名内联盒子中x字母的下边沿：</p>
+<p><img src="/../images/1539837492653.png" alt="1539837492653"></p>
+</li>
+<li><p>如何对齐？</p>
+<p>首先，每个内联盒子都有自己的基线，即每个盒子中字母x的下边沿；行框内所有匿名内联盒子的基线在同一水平线上，我们把这条水平线作为整个行框的默认基线，即上面提到的”默认基线”。</p>
+<p>默认情况下，所有内联盒子的<code>vertical-align</code>都是<code>baseline</code>，这时的对齐方式是内联盒子的基线和整个行框的”默认基线”对齐：</p>
+<p><img src="/../images/1539838192059.png" alt="1539838192059"></p>
+<p>图中的实线是默认基线，虚线是每个内联盒子的基线</p>
+<p>每个内联盒子可以设置不同的<code>vertical-align</code>，这会导致这个盒子在垂直方向上偏离默认基线：</p>
+<p><img src="/../images/1539838404195.png" alt="1539838404195"></p>
+<p>下面举个例子：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;box&quot;</span>&gt;</span></span><br><span class="line">  zyx</span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;span1&quot;</span>&gt;</span>span1 x<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;span2&quot;</span>&gt;</span>x span2<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;span3&quot;</span>&gt;</span>x span2<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">   </span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">  <span class="selector-class">.box</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">width</span>: <span class="number">600px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">background-color</span>: <span class="built_in">rgb</span>(<span class="number">141</span>, <span class="number">118</span>, <span class="number">163</span>);</span></span><br><span class="line"><span class="language-css">  &#125;</span></span><br><span class="line"><span class="language-css">   </span></span><br><span class="line"><span class="language-css">  <span class="selector-class">.span1</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">font-size</span>: <span class="number">20px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">background-color</span>: brown</span></span><br><span class="line"><span class="language-css">  &#125;</span></span><br><span class="line"><span class="language-css">   </span></span><br><span class="line"><span class="language-css">  <span class="selector-class">.span2</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">font-size</span>: <span class="number">40px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">background-color</span>: blue;</span></span><br><span class="line"><span class="language-css">  &#125;</span></span><br><span class="line"><span class="language-css">   </span></span><br><span class="line"><span class="language-css">  <span class="selector-class">.span3</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">font-size</span>: <span class="number">60px</span>;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">background-color</span>: yellowgreen;</span></span><br><span class="line"><span class="language-css">  &#125;</span></span><br><span class="line"><span class="language-css"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>默认情况下内联盒子都是按基线(baseline)对齐的：</p>
+<p><img src="/../images/1539838552222.png" alt="1539838552222"></p>
+<p>可以看到它们确实是按基线对齐的。现在我们来调整一下它们的”对齐线”：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.span1</span> &#123;</span><br><span class="line">  <span class="attribute">vertical-align</span>: -<span class="number">10px</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-class">.span2</span> &#123;</span><br><span class="line">  <span class="attribute">vertical-align</span>: <span class="number">10px</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-class">.span3</span> &#123;</span><br><span class="line">  <span class="attribute">vertical-align</span>: -<span class="number">20px</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下，都相对默认基线偏移了设置的值，正值往上偏移，负值往下偏移：</p>
+<p><img src="/../images/1539838743672.png" alt="1539838743672"></p>
+<p>上面提到的是<code>vertical-align</code>设置成数值的效果，我们还可以使用关键字top，middle，bottom等。top和bottom比较好理解，它们会导致内连盒子的上边沿或下边沿和整个行框的上边沿或下边沿对齐，这2个值和baseline没啥关系。下面我们说下middle，首先是MDN上的正式定义：</p>
+<blockquote>
+<p>middle:</p>
+<p>​	Aligns the middle of the element with the baseline plus half the x-height of the parent</p>
+</blockquote>
+<p>可以看到，middle使得内联盒子的垂直中点和整个行框的默认基线以上1&#x2F;2个x字母的高度位置对齐，也就是和行框中匿名盒子中x字母的交叉点对齐：</p>
+<p><img src="/../images/1539841495253.png" alt="1539841495253"></p>
+<p>图中span1的高度是40px，它的中线穿过外面x字母的交叉点</p>
+</li>
+<li><p>其他vertical-align值</p>
+<ul>
+<li><p>百分比</p>
+<p>和数值意思一样，但是需要和line-height的值相乘得到一个具体px数值</p>
+</li>
+<li><p>text-top</p>
+<p>Aligns the top of the element with the top of the parent element’s font</p>
+</li>
+<li><p>text-bottom</p>
+<p>Aligns the bottom of the element with the bottom of the parent element’s font</p>
+</li>
+</ul>
+<p>用得不多，但是从字面意思应该不难理解</p>
+</li>
+</ol>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.560Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/css/" rel="tag">css</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/inline-box-review/&title=《行内布局的一点新的感悟》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/inline-box-review/&title=《行内布局的一点新的感悟》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/inline-box-review/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《行内布局的一点新的感悟》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/inline-box-review/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/inline-box-review/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/topk/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">随手练练：O(n)时间复杂度解决topk</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/merge-quick-sort/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">随手练练 - 归并和快速排序</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/inline-box-review/&title=《行内布局的一点新的感悟》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/inline-box-review/&title=《行内布局的一点新的感悟》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/inline-box-review/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《行内布局的一点新的感悟》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/inline-box-review/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/inline-box-review/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/inline-box-review/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

@@ -14,27 +14,28 @@
     
     
     
-    <title>tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <title>webgl-coordinate | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="theme-color" content="#3F51B5">
     
     
-    <meta name="keywords" content="front-end, web development">
-    <meta name="description" content="crp test - defer        Hello web performance students!">
-<meta property="og:type" content="website">
-<meta property="og:title" content="tomwang1013的学习总结">
-<meta property="og:url" content="http://tomwang1013.github.io/labs/crp/crp-test-defer.html">
+    <meta name="keywords" content="webgl">
+    <meta name="description" content="WebGL coordinates tips Fragment shader only accepts a normalized and left-handed cube. Each axis begins from -1 to 1 and any contents out of it will be cut out. As to lefted-handed, it means positive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webgl-coordinate">
+<meta property="og:url" content="http://tomwang1013.github.io/webgl-coordinate/index.html">
 <meta property="og:site_name" content="tomwang1013的学习总结">
-<meta property="og:description" content="crp test - defer        Hello web performance students!">
+<meta property="og:description" content="WebGL coordinates tips Fragment shader only accepts a normalized and left-handed cube. Each axis begins from -1 to 1 and any contents out of it will be cut out. As to lefted-handed, it means positive">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://tomwang1013.github.io/labs/crp/awesome-photo.jpg">
-<meta property="article:published_time" content="2023-07-18T03:20:12.649Z">
-<meta property="article:modified_time" content="2023-07-18T03:20:12.649Z">
+<meta property="og:image" content="http://tomwang1013.github.io/images/norm_cube.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/final_step.png">
+<meta property="article:published_time" content="2023-07-18T05:48:42.000Z">
+<meta property="article:modified_time" content="2023-07-18T05:51:37.116Z">
 <meta property="article:author" content="wang xiantong">
-<meta property="article:tag" content="front-end, web development">
+<meta property="article:tag" content="webgl">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://tomwang1013.github.io/labs/crp/awesome-photo.jpg">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/norm_cube.png">
     
         <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
     
@@ -129,7 +130,7 @@
         <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
           <i class="icon icon-lg icon-navicon"></i>
         </a>
-        <div class="flex-col header-title ellipsis"></div>
+        <div class="flex-col header-title ellipsis">webgl-coordinate</div>
         
         <div class="search-wrap" id="search-wrap">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
@@ -148,11 +149,19 @@
         
     </div>
 </header>
-<header class="content-header page-header">
+<header class="content-header post-header">
 
     <div class="container fade-scale">
-        <h1 class="title"></h1>
+        <h1 class="title">webgl-coordinate</h1>
         <h5 class="subtitle">
+            
+                <time datetime="2023-07-18T05:48:42.000Z" itemprop="datePublished" class="page-time">
+  2023-07-18
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
             
         </h5>
     </div>
@@ -164,32 +173,84 @@
 
 
 <div class="container body-wrap">
-    <article class="page-article fade" itemprop="blogPage">
-        <div class="post-content page-content" id="page-content" itemprop="pageContent">
-            <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>crp test - defer</title>
-  <link rel="stylesheet" href="style.css"/>
-</head>
-<body>
-  <p>Hello <span>web performance</span> students!</p>
-  <div><img src="awesome-photo.jpg"></div>
-  <script async src="timing.js"></script>
-</body>
-</html>
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#WebGL-coordinates-tips"><span class="post-toc-number">1.</span> <span class="post-toc-text">WebGL coordinates tips</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-webgl-coordinate"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">webgl-coordinate</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2023-07-18 13:48:42" datetime="2023-07-18T05:48:42.000Z"  itemprop="datePublished">2023-07-18</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="WebGL-coordinates-tips"><a href="#WebGL-coordinates-tips" class="headerlink" title="WebGL coordinates tips"></a>WebGL coordinates tips</h1><ol>
+<li><p>Fragment shader only accepts a normalized and <strong>left-handed</strong> cube. Each axis begins from <code>-1</code> to <code>1</code> and any contents out of it will be cut out. As to lefted-handed, it means positive z axis points into the screen and points with bigger z will be in the back of points with smaller z.<br> <img src="/../images/norm_cube.png" alt="cube"></p>
+<p> So it is the vertex shader’s responsibility to output <em>positions</em> within this normalized cube with any way.</p>
+</li>
+<li><p>We(vertex shader) usually take 4 steps to output this normalized cube:</p>
+<ol>
+<li><p>modeling in <strong>local coordinate system</strong></p>
+</li>
+<li><p>transformation with <em>model matrix</em>(<code>translate(),rotate(),scale()</code>) to get positions in <strong>world coordinates</strong></p>
+</li>
+<li><p>set up the camara with <em>view matrix</em>(<code>lookAt()</code>) to get positions in <strong>view coordinate</strong></p>
+</li>
+<li><p>projection(orthogonal or perspective) with <em>projection matrix</em>(<code>setOrtho(), setPerspective()</code>) to get positions in <strong>clipping coordinate</strong>(i.e. <em><strong>the normalized cube</strong></em>)</p>
+<p> For step 1 ~ step 3, we use <em>right-handed coordinate</em> in general. In step 4, positions are transformed from right-handed to left-handed clipping coordinate. From now on, WebGL takes in charge. It maps positions in the normalized cube(positions out of it will be cut out) to the cavans, using z-value(usually be re-mapped from (-1, 1) to (0, 1), i.e. 0 represents the device’s screen) for depth test:</p>
+<p> <img src="/../images/final_step.png" alt="final display"></p>
+</li>
+</ol>
+</li>
+</ol>
+
         </div>
 
+        <blockquote class="post-copyright">
+    
+    <div class="content">
         
-        <div class="card page-about-me flex-row">
-            <a href="/" class="avatar waves-effect waves-circle waves-light"><img src="/img/avatar.jpg"></a>
-            <div class="content flex-col">
-                <p><strong>wang xiantong</strong></p>
-                <p><em>今歌爸爸的学习记录及生活点滴</em></p>
-                <p>用户页面中作者相关的描述性文字，如不需要设为 false</p>
-            </div>
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T05:51:37.116Z" itemprop="dateUpdated">2023-07-18 13:51:37</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webgl/" rel="tag">webgl</a></li></ul>
+
 
             
 <div class="page-share-wrap">
@@ -198,7 +259,7 @@
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&title=tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -208,22 +269,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&title=tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/labs/crp/crp-test-defer.html" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=tomwang1013的学习总结&url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&via=http://tomwang1013.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-coordinate》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-coordinate/&via=http://tomwang1013.github.io" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -240,34 +301,48 @@
 
 
         </div>
-        
+    </div>
 
-        
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    </article>
     
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/webpack-hot-loader-react/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">webpack-hot-loader-react</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
 
 </div>
 
@@ -310,7 +385,7 @@
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&title=tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -320,22 +395,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&title=tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/labs/crp/crp-test-defer.html" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=tomwang1013的学习总结&url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html&via=http://tomwang1013.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-coordinate》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-coordinate/&via=http://tomwang1013.github.io" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/labs/crp/crp-test-defer.html" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -346,7 +421,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/labs/crp/crp-test-defer.html" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/webgl-coordinate/" alt="微信分享二维码">
 </div>
 
 

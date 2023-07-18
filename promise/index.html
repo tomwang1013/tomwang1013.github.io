@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>promise精髓 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="es6,promise">
+    <meta name="description" content="关于promise的教程很多了，个人也看了不少，但心中总是没有一个清晰的脉络，总感觉知识点有点杂乱，希望在这里做个记录，简单清晰全面地总结promise的用法及注意点，不废话不深入，便于查阅 创建及使用promise创建123456789const p &#x3D; new Promise((resolve, reject) &#x3D;&gt; &amp;#123;    &#x2F;&#x2F; 此函数立即执行    ···    if (">
+<meta property="og:type" content="article">
+<meta property="og:title" content="promise精髓">
+<meta property="og:url" content="http://tomwang1013.github.io/promise/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="关于promise的教程很多了，个人也看了不少，但心中总是没有一个清晰的脉络，总感觉知识点有点杂乱，希望在这里做个记录，简单清晰全面地总结promise的用法及注意点，不废话不深入，便于查阅 创建及使用promise创建123456789const p &#x3D; new Promise((resolve, reject) &#x3D;&gt; &amp;#123;    &#x2F;&#x2F; 此函数立即执行    ···    if (">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1538204868941.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1538211823168.png">
+<meta property="article:published_time" content="2018-07-12T04:49:24.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.560Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="es6">
+<meta property="article:tag" content="promise">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1538204868941.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">promise精髓</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">promise精髓</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-07-12T04:49:24.000Z" itemprop="datePublished" class="page-time">
+  2018-07-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA%E5%8F%8A%E4%BD%BF%E7%94%A8promise"><span class="post-toc-number">1.</span> <span class="post-toc-text">创建及使用promise</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%88%9B%E5%BB%BA"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">创建</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#promise%E7%9A%84%E7%8A%B6%E6%80%81"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">promise的状态</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%B6%88%E8%B4%B9-%E6%9F%A5%E8%AF%A2-%E4%BD%BF%E7%94%A8promise"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">消费&#x2F;查询&#x2F;使用promise</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#promise%E5%A7%8B%E7%BB%88%E6%98%AF%E5%BC%82%E6%AD%A5%E7%9A%84"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">promise始终是异步的</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E5%85%B6%E4%BB%96%E5%88%9B%E5%BB%BApromise%E7%9A%84%E6%96%B9%E6%B3%95"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">其他创建promise的方法</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#const-p-Promise-resolve-x"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">const p &#x3D; Promise.resolve(x)</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#const-p-Promise-reject-error"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">const p &#x3D; Promise.reject(error)</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#promise%E9%93%BE%E6%8E%A5-Chaining-Promises"><span class="post-toc-number">2.</span> <span class="post-toc-text">promise链接(Chaining Promises)</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E4%BD%BF%E7%94%A8%E6%99%AE%E9%80%9A%E5%80%BC%E6%9D%A5resolve-q"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">使用普通值来resolve q</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E4%BD%BF%E7%94%A8%E5%8F%A6%E4%B8%80%E4%B8%AApromise%E6%9D%A5resolve-q"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">使用另一个promise来resolve q</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#resolve-q-from-onRejected"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">resolve q from onRejected</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%80%9A%E8%BF%87%E6%8A%9B%E5%87%BA%E5%BC%82%E5%B8%B8%E6%9D%A5reject-q-%E8%BF%99%E4%B8%AA%E6%97%B6%E5%80%99%E6%B2%A1%E6%9C%89reject%E6%96%B9%E6%B3%95%E5%8F%AF%E4%BB%A5%E8%B0%83%E7%94%A8"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">通过抛出异常来reject q(这个时候没有reject方法可以调用)</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E9%94%99%E8%AF%AF%E9%9A%8F%E9%93%BE%E6%8E%A5%E4%BC%A0%E9%80%92%E7%9B%B4%E5%88%B0catch"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">错误随链接传递直到catch</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E9%94%99%E8%AF%AF%E5%A4%84%E7%90%86%E8%A6%81%E7%82%B9"><span class="post-toc-number">3.</span> <span class="post-toc-text">错误处理要点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E4%B8%8D%E8%A6%81%E4%BD%BF%E7%94%A8then%E6%96%B9%E6%B3%95%E6%9D%A5%E6%8D%95%E8%8E%B7%E9%94%99%E8%AF%AF"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">不要使用then方法来捕获错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#%E6%B3%A8%E6%84%8F%E5%8C%BA%E5%88%86reject%E5%92%8Cthrow"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">注意区分reject和throw</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Promise%E4%B8%AD%E6%8A%9B%E5%87%BA%E7%9A%84%E5%BC%82%E5%B8%B8%E4%B8%8D%E8%83%BD%E8%A2%ABtry-catch%E6%8D%95%E8%8E%B7"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">Promise中抛出的异常不能被try-catch捕获</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#promise%E7%BB%84%E5%90%88"><span class="post-toc-number">4.</span> <span class="post-toc-text">promise组合</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Promise-all-promise1-promise2-%E2%80%A6"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">Promise.all([promise1, promise2, …])</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Promise-race-promise1-promise2-%E2%80%A6"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">Promise.race([promise1, promise2, …])</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%B8%A4%E4%B8%AA%E9%A2%9D%E5%A4%96%E7%9A%84promise%E5%87%BD%E6%95%B0"><span class="post-toc-number">5.</span> <span class="post-toc-text">两个额外的promise函数</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#done"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">done()</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#finally"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">finally()</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#async-await"><span class="post-toc-number">6.</span> <span class="post-toc-text">async &amp; await</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-promise"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">promise精髓</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-07-12 12:49:24" datetime="2018-07-12T04:49:24.000Z"  itemprop="datePublished">2018-07-12</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>关于promise的教程很多了，个人也看了不少，但心中总是没有一个清晰的脉络，总感觉知识点有点杂乱，希望在这里做个记录，简单清晰全面地总结promise的用法及注意点，不废话不深入，便于查阅</p>
+<h2 id="创建及使用promise"><a href="#创建及使用promise" class="headerlink" title="创建及使用promise"></a>创建及使用promise</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> p = <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 此函数立即执行</span></span><br><span class="line">    ···</span><br><span class="line">    <span class="keyword">if</span> (···) &#123;</span><br><span class="line">        <span class="title function_">resolve</span>(value); <span class="comment">// success</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="title function_">reject</span>(reason); <span class="comment">// failure</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>promise创建的时候<strong>立即执行参数函数</strong></p>
+<h3 id="promise的状态"><a href="#promise的状态" class="headerlink" title="promise的状态"></a>promise的状态</h3><p>promise有三种状态：</p>
+<ul>
+<li>Pending：代表初始状态，结果未知</li>
+<li>Resolved：结果成功返回(<code>resolve</code>被调用)</li>
+<li>Rejected：计算过程中发生错误(<code>reject</code>被调用<strong>或者</strong>参数函数执行过程中有异常抛出<code>throw</code>)</li>
+</ul>
+<p>如果promise变成Resolved或Rejected，我们称promise已经稳定了(settled)，稳定之后promise的状态不再变化：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../../images/1538204868941.png" alt="1538204868941" title="">
+                </div>
+                <div class="image-caption">1538204868941</div>
+            </figure>
+
+<h3 id="消费-查询-使用promise"><a href="#消费-查询-使用promise" class="headerlink" title="消费&#x2F;查询&#x2F;使用promise"></a>消费&#x2F;查询&#x2F;使用promise</h3><p>一般都要关心promise的执行结果：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// onFulfilled处理resolved通知，onRejected处理rejected通知</span></span><br><span class="line">promise.<span class="title function_">then</span>(onFulfilled, onRejected)</span><br><span class="line">promise.<span class="title function_">then</span>(<span class="function"><span class="params">value</span> =&gt;</span> &#123; <span class="comment">/* fulfillment */</span> &#125;, <span class="function"><span class="params">error</span> =&gt;</span> &#123; <span class="comment">/* rejection */</span> &#125;)</span><br><span class="line"></span><br><span class="line">promise.<span class="title function_">then</span>(<span class="literal">null</span>, <span class="function"><span class="params">error</span> =&gt;</span> &#123; <span class="comment">/* rejection */</span> &#125;);</span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">promise.<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span> &#123; <span class="comment">/* rejection */</span> &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>我们可以随时查询promise，无论它当时的状态是否是稳定的</p>
+<h3 id="promise始终是异步的"><a href="#promise始终是异步的" class="headerlink" title="promise始终是异步的"></a>promise始终是异步的</h3><p>即使你查询promise的时候promise的状态已经是稳定的，你传递的通知函数也会被异步调用：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Promise</span>.<span class="title function_">resolve</span>(<span class="number">1</span>).<span class="title function_">then</span>(<span class="function"><span class="params">value</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(value))</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印结果：</span></span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="其他创建promise的方法"><a href="#其他创建promise的方法" class="headerlink" title="其他创建promise的方法"></a>其他创建promise的方法</h3><h4 id="const-p-Promise-resolve-x"><a href="#const-p-Promise-resolve-x" class="headerlink" title="const p = Promise.resolve(x)"></a><code>const p = Promise.resolve(x)</code></h4><ul>
+<li>x是普通值：p是一个处于Resolved状态且值为x的promise</li>
+<li>x也是通过resolve创建的promise：p &#x3D; x</li>
+<li>x是其他方式创建的promise：p的状态取决于x的状态，就是说你查询p和查询x是等价的</li>
+</ul>
+<h4 id="const-p-Promise-reject-error"><a href="#const-p-Promise-reject-error" class="headerlink" title="const p = Promise.reject(error)"></a><code>const p = Promise.reject(error)</code></h4><p>返回一个处于Rejected状态且错误为error的promise：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> myError = <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Problem!&#x27;</span>);</span><br><span class="line"><span class="title class_">Promise</span>.<span class="title function_">reject</span>(myError).<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(err === myError)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="promise链接-Chaining-Promises"><a href="#promise链接-Chaining-Promises" class="headerlink" title="promise链接(Chaining Promises)"></a>promise链接(Chaining Promises)</h2><p>promise的一大优点是可以链接，因为<code>Promise.then</code>的返回值还是一个promise：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> q = p.<span class="title function_">then</span>(onFulfilled, onRejected) <span class="comment">// q is a new promise</span></span><br></pre></td></tr></table></figure>
+
+<p>所以我们可以继续查询q：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.<span class="title function_">then</span>(onFulfilled, onRejected)</span><br><span class="line">.<span class="title function_">then</span>(<span class="function"><span class="params">value</span> =&gt;</span> &#123;&#125;)	<span class="comment">// resolved with what is returned by either onFulfilled or onRejected</span></span><br><span class="line">.<span class="title function_">catch</span>(<span class="function"><span class="params">error</span> =&gt;</span>&#123;&#125;)	<span class="comment">// rejected if either onFulfilled or onRejected throw an exception</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用普通值来resolve-q"><a href="#使用普通值来resolve-q" class="headerlink" title="使用普通值来resolve q"></a>使用普通值来resolve q</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">value1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">123</span>;	<span class="comment">// q is a promise resolved with 123</span></span><br><span class="line">&#125;)</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">value2</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(value2); <span class="comment">// 123</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用另一个promise来resolve-q"><a href="#使用另一个promise来resolve-q" class="headerlink" title="使用另一个promise来resolve q"></a>使用另一个promise来resolve q</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">value1</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> r;	<span class="comment">// r is a promise, q = r</span></span><br><span class="line">&#125;)</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">value2</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(value2);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><code>resolve promise with normal value or another promise</code>状态示意图：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1538211823168.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<h3 id="resolve-q-from-onRejected"><a href="#resolve-q-from-onRejected" class="headerlink" title="resolve q from onRejected"></a>resolve q from <code>onRejected</code></h3><p>从<code>onRejected</code>中返回的值一样可以用来resolve(<em>不是reject</em>) q：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.<span class="title function_">catch</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// Something went wrong, use a default value</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;Untitled.txt&#x27;</span>;</span><br><span class="line">&#125;)</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">fileName</span>) &#123;</span><br><span class="line">    ···</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过抛出异常来reject-q-这个时候没有reject方法可以调用"><a href="#通过抛出异常来reject-q-这个时候没有reject方法可以调用" class="headerlink" title="通过抛出异常来reject q(这个时候没有reject方法可以调用)"></a>通过抛出异常来reject q(这个时候没有reject方法可以调用)</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">p</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">value</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>();</span><br><span class="line">&#125;)</span><br><span class="line">.<span class="title function_">catch</span>(<span class="keyword">function</span> (<span class="params">reason</span>) &#123;</span><br><span class="line">    <span class="comment">// Handle error here</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="错误随链接传递直到catch"><a href="#错误随链接传递直到catch" class="headerlink" title="错误随链接传递直到catch"></a>错误随链接传递直到catch</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">asyncFunc1</span>()</span><br><span class="line">.<span class="title function_">then</span>(asyncFunc2)</span><br><span class="line">.<span class="title function_">then</span>(asyncFunc3)</span><br><span class="line">.<span class="title function_">catch</span>(<span class="keyword">function</span> (<span class="params">reason</span>) &#123;</span><br><span class="line">    <span class="comment">// Something went wrong above</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="错误处理要点"><a href="#错误处理要点" class="headerlink" title="错误处理要点"></a>错误处理要点</h2><h3 id="不要使用then方法来捕获错误"><a href="#不要使用then方法来捕获错误" class="headerlink" title="不要使用then方法来捕获错误"></a>不要使用then方法来捕获错误</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Don’t do this</span></span><br><span class="line"><span class="comment">// onRejected能捕获promise抛出的错误，但是不能捕获onFulfilled执行过程中抛出的异常</span></span><br><span class="line">promise.<span class="title function_">then</span>(onFulfilled, onRejected)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更好的做法</span></span><br><span class="line">promise.<span class="title function_">then</span>(onFulfilled).<span class="title function_">catch</span>(onRejected)</span><br></pre></td></tr></table></figure>
+
+<h3 id="注意区分reject和throw"><a href="#注意区分reject和throw" class="headerlink" title="注意区分reject和throw"></a>注意区分reject和throw</h3><p>一般来说reject抛出的是可预期的操作错误，如文件不存在、网络断开等；而throw抛出的是代码错误，如参数类型错误等</p>
+<h3 id="Promise中抛出的异常不能被try-catch捕获"><a href="#Promise中抛出的异常不能被try-catch捕获" class="headerlink" title="Promise中抛出的异常不能被try-catch捕获"></a>Promise中抛出的异常不能被try-catch捕获</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123; </span><br><span class="line">    <span class="title class_">Promise</span>.<span class="title function_">resolve</span>(<span class="number">1</span>).<span class="title function_">then</span>(<span class="function"><span class="params">a</span> =&gt;</span> &#123; <span class="keyword">throw</span> <span class="string">&#x27;err&#x27;</span> &#125;) </span><br><span class="line">&#125; <span class="keyword">catch</span> (e) &#123; </span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="number">222</span>, e) <span class="comment">// 无法捕获上面的错误</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="promise组合"><a href="#promise组合" class="headerlink" title="promise组合"></a>promise组合</h2><h3 id="Promise-all-promise1-promise2-…"><a href="#Promise-all-promise1-promise2-…" class="headerlink" title="Promise.all([promise1, promise2, …])"></a>Promise.all([promise1, promise2, …])</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">    <span class="title function_">asyncFunc1</span>(),</span><br><span class="line">    <span class="title function_">asyncFunc2</span>(),</span><br><span class="line">])</span><br><span class="line">.<span class="title function_">then</span>(<span class="function">(<span class="params">[result1, result2]</span>) =&gt;</span> &#123;</span><br><span class="line">    ···</span><br><span class="line">&#125;)</span><br><span class="line">.<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// Receives first rejection among the Promises</span></span><br><span class="line">    ···</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Promise-race-promise1-promise2-…"><a href="#Promise-race-promise1-promise2-…" class="headerlink" title="Promise.race([promise1, promise2, …])"></a>Promise.race([promise1, promise2, …])</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Promise</span>.<span class="title function_">race</span>([</span><br><span class="line">    <span class="title function_">httpGet</span>(<span class="string">&#x27;http://example.com/file.txt&#x27;</span>),</span><br><span class="line">    <span class="title function_">delay</span>(<span class="number">5000</span>).<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Timed out&#x27;</span>)</span><br><span class="line">    &#125;);</span><br><span class="line">])</span><br><span class="line">.<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">text</span>) &#123; ··· &#125;)</span><br><span class="line">.<span class="title function_">catch</span>(<span class="keyword">function</span> (<span class="params">reason</span>) &#123; ··· &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="两个额外的promise函数"><a href="#两个额外的promise函数" class="headerlink" title="两个额外的promise函数"></a>两个额外的promise函数</h2><h3 id="done"><a href="#done" class="headerlink" title="done()"></a>done()</h3><p>前面说过promise中抛出的异常外界捕获不到，所以我们解决这个问题(始终加上catch也不行，catch中也可能抛出异常)，可以在promise上定义一个<code>done</code>方法，然后跟在promise链最后面：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">doSomething</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">asyncFunc</span>()</span><br><span class="line">    .<span class="title function_">then</span>(f1)</span><br><span class="line">    .<span class="title function_">catch</span>(r1)</span><br><span class="line">    .<span class="title function_">then</span>(f2)</span><br><span class="line">    .<span class="title function_">done</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以这样来定义done方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Promise</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">done</span> = <span class="keyword">function</span> (<span class="params">onFulfilled, onRejected</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">then</span>(onFulfilled, onRejected)</span><br><span class="line">    .<span class="title function_">catch</span>(<span class="keyword">function</span> (<span class="params">reason</span>) &#123;</span><br><span class="line">        <span class="comment">// Throw an exception globally</span></span><br><span class="line">        <span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123; <span class="keyword">throw</span> reason &#125;, <span class="number">0</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="finally"><a href="#finally" class="headerlink" title="finally()"></a>finally()</h3><p>仿造<code>try-catch-finally</code>我们可以在promise上定义一个finally方法，使得无论最后promise状态如何，始终执行一个callback：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Promise</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">finally</span> = <span class="keyword">function</span> (<span class="params">callback</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> P = <span class="variable language_">this</span>.<span class="property">constructor</span>;</span><br><span class="line">    <span class="comment">// We don’t invoke the callback in here,</span></span><br><span class="line">    <span class="comment">// because we want then() to handle its exceptions</span></span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">then</span>(</span><br><span class="line">        <span class="comment">// Callback fulfills =&gt; continue with receiver’s fulfillment or rejection</span></span><br><span class="line">        <span class="comment">// Callback rejects =&gt; pass on that rejection (then() has no 2nd parameter!)</span></span><br><span class="line">        <span class="function"><span class="params">value</span>  =&gt;</span> P.<span class="title function_">resolve</span>(<span class="title function_">callback</span>()).<span class="title function_">then</span>(<span class="function">() =&gt;</span> value),</span><br><span class="line">        <span class="function"><span class="params">reason</span> =&gt;</span> P.<span class="title function_">resolve</span>(<span class="title function_">callback</span>()).<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123; <span class="keyword">throw</span> reason &#125;)</span><br><span class="line">    );</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="async-await"><a href="#async-await" class="headerlink" title="async &amp; await"></a>async &amp; await</h2><p>async &amp; await本质上是promise的语法糖，掌握了promise基本知道它们的用法了，这个需要注意的是<strong>async函数始终返回一个promise</strong>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">123</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于：</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">resolve</span>(<span class="number">123</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">asyncFunc</span>().<span class="title function_">then</span>(<span class="function"><span class="params">x</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(x)); <span class="comment">// 123</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Problem!&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于：</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Problem!&#x27;</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">asyncFunc</span>().<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(err)); <span class="comment">// Error: Problem!</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// async可可以直接返回另一个promise</span></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">resolve</span>(<span class="number">123</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">asyncFunc</span>().<span class="title function_">then</span>(<span class="function"><span class="params">x</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(x)) <span class="comment">// 123</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">reject</span>(<span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Problem!&#x27;</span>));</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">asyncFunc</span>().<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">error</span>(err)); <span class="comment">// Error: Problem!</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="title function_">otherAsyncFunc</span>();</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(result);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于:</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">otherAsyncFunc</span>()</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(result);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> result1 = <span class="keyword">await</span> <span class="title function_">otherAsyncFunc1</span>();</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(result1);</span><br><span class="line">    <span class="keyword">const</span> result2 = <span class="keyword">await</span> <span class="title function_">otherAsyncFunc2</span>();</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(result2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于:</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">otherAsyncFunc1</span>()</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">result1</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(result1);</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">otherAsyncFunc2</span>();</span><br><span class="line">    &#125;)</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">result2</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(result2);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> [result1, result2] = <span class="keyword">await</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">        <span class="title function_">otherAsyncFunc1</span>(),</span><br><span class="line">        <span class="title function_">otherAsyncFunc2</span>(),</span><br><span class="line">    ]);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(result1, result2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于:</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">        <span class="title function_">otherAsyncFunc1</span>(),</span><br><span class="line">        <span class="title function_">otherAsyncFunc2</span>(),</span><br><span class="line">    ])</span><br><span class="line">    .<span class="title function_">then</span>([result1, result2] =&gt; &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(result1, result2);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 当otherAsyncFunc reject时await语句会抛出异常</span></span><br><span class="line">        <span class="keyword">await</span> <span class="title function_">otherAsyncFunc</span>();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">error</span>(err);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 等价于:</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">asyncFunc</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">otherAsyncFunc</span>()</span><br><span class="line">    .<span class="title function_">catch</span>(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">error</span>(err);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：一个async函数asyncFunc有下面4种调用方法：</p>
+<ul>
+<li>asyncFunc()</li>
+<li>await asyncFunc()</li>
+<li>return asyncFunc()</li>
+<li>return await asyncFunc()</li>
+</ul>
+<p>它们的意义各不相同，参考下面的博文</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="http://exploringjs.com/es6/ch_promises.html">http://exploringjs.com/es6/ch_promises.html</a></p>
+<p><a target="_blank" rel="noopener" href="http://exploringjs.com/es2016-es2017/ch_async-functions.html">http://exploringjs.com/es2016-es2017/ch_async-functions.html</a></p>
+<p><a target="_blank" rel="noopener" href="https://jakearchibald.com/2017/await-vs-return-vs-return-await/">https://jakearchibald.com/2017/await-vs-return-vs-return-await/</a></p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.560Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/es6/" rel="tag">es6</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/" rel="tag">promise</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/promise/&title=《promise精髓》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/promise/&title=《promise精髓》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/promise/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《promise精髓》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/promise/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/promise/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/webgl-perspect/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">透视投影解析 - 从建模到像素（WebGL）</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/promise-race-transform/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Promise.race一种变形：any resolve =&gt; resolve, all reject =&gt; reject实现</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/promise/&title=《promise精髓》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/promise/&title=《promise精髓》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/promise/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《promise精髓》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/promise/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/promise/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/promise/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

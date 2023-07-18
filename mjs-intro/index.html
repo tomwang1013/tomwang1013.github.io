@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>module javascript(mjs)介绍 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="html5,es6">
+    <meta name="description" content="作为前端工程师，我们基本都被webpack和babel蹂躏过，并且将继续被蹂躏。module javascript(下面简称mjs)带来了一点点曙光，本文简单介绍一下mjs 基本用法我们知道，一个js模块是封闭的：它里面定义的所有顶层变量的作用范围都是在模块之内；它对外的接口需要手动导出(export)，模块是我们写代码的正确姿势。但是普通的js文件被浏览器引入之后它里面的代码都是在全局作用域运行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="module javascript(mjs)介绍">
+<meta property="og:url" content="http://tomwang1013.github.io/mjs-intro/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="作为前端工程师，我们基本都被webpack和babel蹂躏过，并且将继续被蹂躏。module javascript(下面简称mjs)带来了一点点曙光，本文简单介绍一下mjs 基本用法我们知道，一个js模块是封闭的：它里面定义的所有顶层变量的作用范围都是在模块之内；它对外的接口需要手动导出(export)，模块是我们写代码的正确姿势。但是普通的js文件被浏览器引入之后它里面的代码都是在全局作用域运行">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1542269076755.png">
+<meta property="article:published_time" content="2018-11-15T05:38:19.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.560Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="html5">
+<meta property="article:tag" content="es6">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1542269076755.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">module javascript(mjs)介绍</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">module javascript(mjs)介绍</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-11-15T05:38:19.000Z" itemprop="datePublished" class="page-time">
+  2018-11-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="post-toc-number">1.</span> <span class="post-toc-text">基本用法</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#mjs%E5%92%8C%E6%99%AE%E9%80%9Ajs%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="post-toc-number">2.</span> <span class="post-toc-text">mjs和普通js的区别</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%85%B6%E4%BB%96%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">其他注意点</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E6%9C%89%E4%BA%86mjs%EF%BC%8C%E8%BF%98%E9%9C%80%E8%A6%81%E6%89%93%E5%8C%85%E5%90%97%EF%BC%9F"><span class="post-toc-number">3.</span> <span class="post-toc-text">有了mjs，还需要打包吗？</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-mjs-intro"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">module javascript(mjs)介绍</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-11-15 13:38:19" datetime="2018-11-15T05:38:19.000Z"  itemprop="datePublished">2018-11-15</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>作为前端工程师，我们基本都被<code>webpack</code>和<code>babel</code>蹂躏过，并且将继续被蹂躏。<strong>module javascript</strong>(下面简称mjs)带来了一点点曙光，本文简单介绍一下mjs</p>
+<h1 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h1><p>我们知道，一个js模块是封闭的：它里面定义的所有顶层变量的作用范围都是在模块之内；它对外的接口需要手动导出(export)，模块是我们写代码的正确姿势。但是普通的js文件被浏览器引入之后它里面的代码都是在全局作用域运行的，这才导致了各种模块加载方式的出现，如commonJS，AMD, es6 Module等。</p>
+<p>mjs指的是在浏览器端可以直接引用es6 module模块，和普通的js一样，可以引入一个文件，也可以直接inline：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span> <span class="attr">src</span>=<span class="string">&quot;main.mjs&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">  <span class="keyword">import</span> foo <span class="keyword">from</span> <span class="string">&#x27;./bar.mjs&#x27;</span></span></span><br><span class="line"><span class="language-javascript">  ...</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>模块文件一般以<code>mjs</code>作为后缀，里面可以使用import和export，和平时的写法一样</p>
+<h1 id="mjs和普通js的区别"><a href="#mjs和普通js的区别" class="headerlink" title="mjs和普通js的区别"></a>mjs和普通js的区别</h1><p>加上<code>type=&quot;module&quot;</code>之后，引入的js变成了mjs，它和普通的js有很多区别：</p>
+<ol>
+<li><p>mjs默认使用<code>strict mode</code></p>
+</li>
+<li><p>mjs中定义的顶层变量不再是全局变量</p>
+</li>
+<li><p>新的import和export语法只能在mjs中使用，不能再普通js中使用</p>
+</li>
+<li><p>不管被加载多少次，同一个mjs只执行一次；而普通的js每次加载都会执行</p>
+</li>
+<li><p>mjs通过CORS的方式加载，需要服务端的配合；而普通js直接可以跨域加载</p>
+</li>
+<li><p>mjs默认是defer，而普通js需要指定defer属性</p>
+</li>
+<li><p>inline mjs默认也是defer，而普通inline js无法defer</p>
+</li>
+<li><p>inline mjs可以设置async属性，而普通inline js无法async</p>
+<p>这里有张经典的图可以说明上面几条性质：</p>
+<p><img src="/../images/1542269076755.png"></p>
+</li>
+</ol>
+<h2 id="其他注意点"><a href="#其他注意点" class="headerlink" title="其他注意点"></a>其他注意点</h2><ol>
+<li><p>mjs文件的路径(import * from <strong>modulePath</strong>)的限制：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Not supported (yet):</span></span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;jquery&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;lib.mjs&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;modules/lib.mjs&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Supported:</span></span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;./lib.mjs&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;../lib.mjs&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;/modules/lib.mjs&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;shout&#125; <span class="keyword">from</span> <span class="string">&#x27;https://simple.example/modules/lib.mjs&#x27;</span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对于CORS请求，如果是同域的话，需要注意是否发送credentials(cookies, etc)</p>
+<p>大部分和CORS相关的api如果是请求同域的话，默认都会发送credentials的，但是fetch和mjs是个例外，你可能需要设置<code>crossorigin </code>才能发送：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- <span class="title class_">Fetched</span> <span class="keyword">with</span> credentials (cookies etc) --&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;1.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line">&lt;!-- <span class="title class_">Fetched</span> without credentials --&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span> <span class="attr">src</span>=<span class="string">&quot;1.mjs&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line">&lt;!-- <span class="title class_">Fetched</span> <span class="keyword">with</span> credentials --&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span> <span class="attr">crossorigin</span> <span class="attr">src</span>=<span class="string">&quot;1.mjs?&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line">&lt;!-- <span class="title class_">Fetched</span> without credentials --&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span> <span class="attr">crossorigin</span> <span class="attr">src</span>=<span class="string">&quot;https://other-origin/1.mjs&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"></span><br><span class="line">&lt;!-- <span class="title class_">Fetched</span> <span class="keyword">with</span> credentials--&gt;</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;module&quot;</span> <span class="attr">crossorigin</span>=<span class="string">&quot;use-credentials&quot;</span> <span class="attr">src</span>=<span class="string">&quot;https://other-origin/1.mjs?&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>但是这个例外未来很可能会变成不例外：</p>
+<p>Both <code>fetch()</code> and module scripts will send credentials to same-origin URLs by default. <a target="_blank" rel="noopener" href="https://github.com/whatwg/fetch/pull/585">Issue</a></p>
+</li>
+<li><p>要使mjs生效，服务端必须明确在对mjs文件的响应中把<code>content-type</code>设置为js格式：推荐为<code>text/javascript</code></p>
+</li>
+</ol>
+<h1 id="有了mjs，还需要打包吗？"><a href="#有了mjs，还需要打包吗？" class="headerlink" title="有了mjs，还需要打包吗？"></a>有了mjs，还需要打包吗？</h1><p>简单答案是：要</p>
+<p>但是mjs提供了一些想象的优化空间，值得注意一下。</p>
+<p>TODO</p>
+<p>参考文档：</p>
+<p><a target="_blank" rel="noopener" href="https://developers.google.com/web/fundamentals/primers/modules">https://developers.google.com/web/fundamentals/primers/modules</a></p>
+<p><a target="_blank" rel="noopener" href="https://jakearchibald.com/2017/es-modules-in-browsers/">https://jakearchibald.com/2017/es-modules-in-browsers/</a></p>
+<p><a target="_blank" rel="noopener" href="https://philipwalton.com/articles/deploying-es2015-code-in-production-today/">https://philipwalton.com/articles/deploying-es2015-code-in-production-today/</a></p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.560Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/es6/" rel="tag">es6</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/html5/" rel="tag">html5</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/mjs-intro/&title=《module javascript(mjs)介绍》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/mjs-intro/&title=《module javascript(mjs)介绍》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/mjs-intro/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《module javascript(mjs)介绍》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/mjs-intro/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/mjs-intro/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/webpack-sideEffects/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">webpack sideEffects选项简介</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/preload-prefetch/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">使用preload &amp; prefetch提高加载速度</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/mjs-intro/&title=《module javascript(mjs)介绍》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/mjs-intro/&title=《module javascript(mjs)介绍》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/mjs-intro/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《module javascript(mjs)介绍》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/mjs-intro/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/mjs-intro/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/mjs-intro/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

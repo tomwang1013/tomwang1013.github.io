@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>web component之shadow dom | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="html5,web component">
+    <meta name="description" content="在custom elment中我们提到web component的封装性需要shadow dom来进一步提升，因为shadow dom具有两大特点：  Isolated DOM：隔离的dom结构 Scoped CSS：作用范围受限的CSS  一句话：custom elements使我们能创建新的html元素，而shadow dom则为新的元素提供内容(html &amp; css)，它们结合在一起">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web component之shadow dom">
+<meta property="og:url" content="http://tomwang1013.github.io/web-component-shadow-dom/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="在custom elment中我们提到web component的封装性需要shadow dom来进一步提升，因为shadow dom具有两大特点：  Isolated DOM：隔离的dom结构 Scoped CSS：作用范围受限的CSS  一句话：custom elements使我们能创建新的html元素，而shadow dom则为新的元素提供内容(html &amp; css)，它们结合在一起">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540274643627.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540275086006.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540275540129.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540275645122.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540285980857.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540287137492.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540287198222.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540287536883.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540287575786.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540288132596.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540288249870.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540288701927.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540298214495.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/1540299236892.png">
+<meta property="article:published_time" content="2018-10-22T06:33:45.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.568Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="html5">
+<meta property="article:tag" content="web component">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/1540274643627.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">web component之shadow dom</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">web component之shadow dom</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-10-22T06:33:45.000Z" itemprop="datePublished" class="page-time">
+  2018-10-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFshadow-dom%EF%BC%9F"><span class="post-toc-number">1.</span> <span class="post-toc-text">什么是shadow dom？</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Isolated-DOM"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">Isolated DOM</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%B8%8D%E6%98%AF%E6%89%80%E6%9C%89%E7%9A%84%E5%85%83%E7%B4%A0%E9%83%BD%E5%8F%AF%E4%BB%A5attach-shadow-dom"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">不是所有的元素都可以attach shadow dom</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E5%86%85%E5%AE%B9%E5%88%86%E5%8F%91%E4%B8%8Eslot"><span class="post-toc-number">2.</span> <span class="post-toc-text">内容分发与slot</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#shadow-dom%E6%A0%B7%E5%BC%8F"><span class="post-toc-number">3.</span> <span class="post-toc-text">shadow dom样式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#scoped-css"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">scoped css</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%BB%8Eshadow-dom%E5%86%85%E9%83%A8%E6%8E%A7%E5%88%B6host%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">从shadow dom内部控制host的样式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E4%BB%8Eshadow-dom%E5%86%85%E9%83%A8%E6%8E%A7%E5%88%B6light-dom%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">从shadow dom内部控制light dom的样式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#%E5%A4%96%E9%83%A8host%E6%A0%B7%E5%BC%8F%E4%BC%98%E5%85%88"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">外部host样式优先</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E4%BD%BF%E7%94%A8shadow-dom%E6%9D%A5%E5%A1%AB%E5%85%85custom-element"><span class="post-toc-number">4.</span> <span class="post-toc-text">使用shadow dom来填充custom element</span></a></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#%E9%AB%98%E7%BA%A7%E4%B8%BB%E9%A2%98"><span class="post-toc-number">5.</span> <span class="post-toc-text">高级主题</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-web-component-shadow-dom"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">web component之shadow dom</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-10-22 14:33:45" datetime="2018-10-22T06:33:45.000Z"  itemprop="datePublished">2018-10-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>在<a target="_blank" rel="noopener" href="http://jinge.red/web-componet-custom-element/">custom elment</a>中我们提到web component的封装性需要<strong>shadow dom</strong>来进一步提升，因为shadow dom具有两大特点：</p>
+<ul>
+<li>Isolated DOM：隔离的dom结构</li>
+<li>Scoped CSS：作用范围受限的CSS</li>
+</ul>
+<p>一句话：custom elements使我们能创建新的html元素，而shadow dom则为新的元素提供内容(html &amp; css)，它们结合在一起使web component(self-contained HTML, CSS, and JavaScript)成为可能</p>
+<p>在下文中，我们会交换使用”自定义元素”和”组件”这两个术语，它们基本可以理解为同一个东西</p>
+<p>下面我们从基础开始一点点揭开shadow dom的面纱</p>
+<h1 id="什么是shadow-dom？"><a href="#什么是shadow-dom？" class="headerlink" title="什么是shadow dom？"></a>什么是shadow dom？</h1><p>普通的dom元素可以有自己的子节点，如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p1<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p2<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的<code>div</code>元素有两个子元素；除此之外，我们还可以在它上面依附(attach)另一个dom树：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> div = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;to-attach-shadow&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// attach a shadow dom tree to it</span></span><br><span class="line"><span class="keyword">const</span> shadowRoot = div.<span class="title function_">attachShadow</span>(&#123; <span class="attr">mode</span>: <span class="string">&#x27;open&#x27;</span> &#125;);</span><br><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">&#x27;&lt;p&gt;shadow p1&lt;/p&gt;&lt;p&gt;shadow p2&lt;/p&gt;&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540274643627.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>依附的这个dom树就是shadow dom，它的根节点叫<strong>shadow root</strong>，而它依附的元素(这里的div)叫<strong>shadow host</strong>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">div.<span class="property">shadowRoot</span> === shadowRoot <span class="comment">// true</span></span><br><span class="line">shadowRoot.<span class="property">host</span> === div <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>那这里的渲染结果是什么？根据之前custom element中的例子，我们应该才到原来的内容被丢弃了，渲染出来的是shadow dom中的内容：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275086006.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<h2 id="Isolated-DOM"><a href="#Isolated-DOM" class="headerlink" title="Isolated DOM"></a>Isolated DOM</h2><p>这里我们通过<code>document.querySelectorAll</code>只能得到原来的两个p元素：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275540129.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>shadow dom中的内容没法通过正常途径查询出来，只能通过shadow root来查：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540275645122.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<h2 id="不是所有的元素都可以attach-shadow-dom"><a href="#不是所有的元素都可以attach-shadow-dom" class="headerlink" title="不是所有的元素都可以attach shadow dom"></a>不是所有的元素都可以attach shadow dom</h2><p>有些元素(如：textarea，video等)浏览器已经使用了shadow dom来实现了，你不能再加了；有些元素加shadow dom没有任何意义，如img。所以，只有部分元素可以添加shadow dom，当然这部分元素包含了所有合法的custom elements，参考<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/API/Element/attachShadow">attachShadow</a>查看具体哪些元素可以</p>
+<h1 id="内容分发与slot"><a href="#内容分发与slot" class="headerlink" title="内容分发与slot"></a>内容分发与slot</h1><p>我们把元素原来的子节点dom结构称为<strong>light dom</strong>，前面我们知道，默认情况下light dom是不会渲染出来的，最终的渲染结果完全由其上依附的shadow dom决定:</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540285980857.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>这样不是很灵活，有时候我们希望由组件的使用者和开发者共同决定最终的渲染内容，这就是<strong>slot</strong>的由来：我们可以在shadow dom里面指定一些slot(插槽)，用来接收来自light dom中的内容，例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码将整个light dom的内容插入到slot指定位置，渲染结果：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287137492.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>shadow dom结构：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287198222.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>slot还可以指定<code>name</code>属性，然后在light dom中可以通过在元素上指定<code>slot=slotName</code>将对应元素渲染到指定的slot中，例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name=&quot;slot1&quot;&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;to-attach-shadow&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span> <span class="attr">slot</span>=<span class="string">&quot;slot1&quot;</span>&gt;</span>p1<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">p</span>&gt;</span>p2<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>渲染结果：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287536883.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>dom结构：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540287575786.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>light dom中没有指定slot属性的都被渲染到默认的匿名slot中</p>
+<h1 id="shadow-dom样式"><a href="#shadow-dom样式" class="headerlink" title="shadow dom样式"></a>shadow dom样式</h1><h2 id="scoped-css"><a href="#scoped-css" class="headerlink" title="scoped css"></a>scoped css</h2><p>shadow dom内部的元素样式不受外部css影响，内部定义的css也只作用于内部的元素，不影响外部，你可以把shadow root看做是一个屏障，把shadow dom和外面隔开了。比如说我们在外面定义了样式：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">p</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">200%</span>;</span><br><span class="line">  <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个样式只影响light dom，对shadow dom没有影响：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540288132596.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>同理，我们在shadow dom内部定义了它自己的样式(外部的样式被删除了)，对外部元素的样式没有影响：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    p &#123;</span></span><br><span class="line"><span class="string">      font-size: 20px;</span></span><br><span class="line"><span class="string">      color: blue;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name=&quot;slot1&quot;&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/../images/1540288249870.png"></p>
+<p>但是，shadow dom的样式还是受继承属性的影响，比如我们在body上面定义了一些继承属性，如<code>font-size</code>等，shadow dom也受这个影响:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">body</span> &#123;</span><br><span class="line">  <span class="attribute">font-size</span>: <span class="number">20px</span>;</span><br><span class="line">  <span class="attribute">color</span>: red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540288701927.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>特别地，shadow dom的样式从shadow host继承，受host元素样式的影响，把上面的body换成div同样成立</p>
+<h2 id="从shadow-dom内部控制host的样式"><a href="#从shadow-dom内部控制host的样式" class="headerlink" title="从shadow dom内部控制host的样式"></a>从shadow dom内部控制host的样式</h2><p>我们可以在shadow dom内部利用下面三个selector选中其所在的host元素：</p>
+<ul>
+<li><p>:host</p>
+<p>无条件选中host</p>
+</li>
+<li><p>:host(selector)</p>
+<p>只有满足<code>selector</code>的host才被选中</p>
+</li>
+<li><p>:host-context(selector)</p>
+<p>只有其本身或其祖先节点满足<code>selector</code>的host才被选中，是<code>:host(selector)</code>的超集</p>
+</li>
+</ul>
+<p>利用这些选择器，我们可以在shadow dom内部控制host的样式，如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    :host &#123;</span></span><br><span class="line"><span class="string">      color: red;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    p &#123;</span></span><br><span class="line"><span class="string">      color: blue;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name=&quot;slot1&quot;&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540298214495.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p>我们在host元素(即这里的div)上设置了<code>color: red</code>，所以light dom中的p元素都是红色；在shadow dom内部还重新定义了p的样式：<code>color: blue</code>，覆盖了从host元素继承的样式，所以shadow dom内部的p是蓝色。</p>
+<h2 id="从shadow-dom内部控制light-dom的样式"><a href="#从shadow-dom内部控制light-dom的样式" class="headerlink" title="从shadow dom内部控制light dom的样式"></a>从shadow dom内部控制light dom的样式</h2><p>从上一节可以看到，light dom样式完全不受shadow dom内部样式影响，我们可以想象成<em>light dom以外部样式渲染好了之后再插入到shadow dom的slot处</em>。浏览器提供了一种机制：在light dom中的元素插入到slot处时，可以继续对它(已经使用外部样式渲染好了)追加一些样式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;style&gt;</span></span><br><span class="line"><span class="string">    :host &#123;</span></span><br><span class="line"><span class="string">      color: red;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    ::slotted(p) &#123;</span></span><br><span class="line"><span class="string">      font-size: 30px;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &lt;/style&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p1&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot name=&quot;slot1&quot;&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">  &lt;p&gt;shadow p2&lt;/p&gt;</span></span><br><span class="line"><span class="string">  &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">`</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这使得light dom中的p元素的font-size变成30px：</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="../images/1540299236892.png" alt="" title="">
+                </div>
+                <div class="image-caption"></div>
+            </figure>
+
+<p><code>::slotted(selector)</code>只能作用于顶层元素，例如这里只能选择p元素，而不能选择p元素的子元素(如果有的话)</p>
+<h2 id="外部host样式优先"><a href="#外部host样式优先" class="headerlink" title="外部host样式优先"></a>外部host样式优先</h2><p>对于host元素，我们既可以在外部也可以在内部添加样式，当发生冲突时，外部的样式优先</p>
+<h1 id="使用shadow-dom来填充custom-element"><a href="#使用shadow-dom来填充custom-element" class="headerlink" title="使用shadow dom来填充custom element"></a>使用shadow dom来填充custom element</h1><p>前面一直以普通的div元素来讲解shadow dom的机制，其实它的最佳拍档是custom element，一般来说，我们是在自定义元素的constructor中进行填充：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">HTMLClockElement</span> <span class="keyword">extends</span> <span class="title class_ inherited__">HTMLElement</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="variable language_">super</span>();</span><br><span class="line">    <span class="comment">// this.innerHTML = &#x27;i am a clock custom element&#x27;</span></span><br><span class="line">    <span class="keyword">const</span> shadowRoot = <span class="variable language_">this</span>.<span class="title function_">attachShadow</span>(&#123; <span class="attr">mode</span>: <span class="string">&#x27;open&#x27;</span> &#125;);</span><br><span class="line">    shadowRoot.<span class="property">innerHTML</span> = <span class="string">`</span></span><br><span class="line"><span class="string">      &lt;style&gt;</span></span><br><span class="line"><span class="string">        ...</span></span><br><span class="line"><span class="string">      &lt;/style&gt;</span></span><br><span class="line"><span class="string">      &lt;p&gt;from clock&#x27;s shadow dom&lt;/p&gt;</span></span><br><span class="line"><span class="string">      &lt;slot&gt;&lt;/slot&gt;</span></span><br><span class="line"><span class="string">    `</span>;</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;custom element created&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">x-clock</span>&gt;</span>i am a clock<span class="tag">&lt;/<span class="name">x-clock</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样，<code>x-clock</code>就算得上一个真正的组件了，cool~</p>
+<h1 id="高级主题"><a href="#高级主题" class="headerlink" title="高级主题"></a>高级主题</h1><p>有一些高级主题这里就不详细介绍了，大家碰到时可以参考google文档：<a target="_blank" rel="noopener" href="https://developers.google.com/web/fundamentals/web-components/shadowdom#advanced">https://developers.google.com/web/fundamentals/web-components/shadowdom#advanced</a></p>
+<p>其中最重要的是shadow dom的<a target="_blank" rel="noopener" href="https://developers.google.com/web/fundamentals/web-components/shadowdom#advanced">事件模型</a>：发生在shadow dom内部的事件如何处理</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.568Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/html5/" rel="tag">html5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/web-component/" rel="tag">web component</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/web-component-shadow-dom/&title=《web component之shadow dom》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/web-component-shadow-dom/&title=《web component之shadow dom》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/web-component-shadow-dom/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《web component之shadow dom》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/web-component-shadow-dom/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/web-component-shadow-dom/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/pwa-clients-claim-vs-self-skipWaiting/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">service worker之clients.claim() vs self.skipWaiting()</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/web-componet-custom-element/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">web component之custom element</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/web-component-shadow-dom/&title=《web component之shadow dom》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/web-component-shadow-dom/&title=《web component之shadow dom》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/web-component-shadow-dom/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《web component之shadow dom》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/web-component-shadow-dom/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/web-component-shadow-dom/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/web-component-shadow-dom/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

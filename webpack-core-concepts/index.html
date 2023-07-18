@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>对webpack的几个核心概念的理解 | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="webpack">
+    <meta name="description" content="webpack是公认的功能强大但是难用的工具，虽然文档很全，但是由于各种配置太多且很多配置只有经过测试才能发现其意义，虽然自己从两年前就开始使用了，但是也只是勉强能给出符合项目要求的配置而已。最近webpack4发布了，自己又从头开始仔细读了一下它的guide文档，并按照文档的示例跑了一遍，对webpack的几个核心概念终于有了稍微清晰的认识，这里记录一下  chunk chunk大概是文档中出现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对webpack的几个核心概念的理解">
+<meta property="og:url" content="http://tomwang1013.github.io/webpack-core-concepts/index.html">
+<meta property="og:site_name" content="tomwang1013的学习总结">
+<meta property="og:description" content="webpack是公认的功能强大但是难用的工具，虽然文档很全，但是由于各种配置太多且很多配置只有经过测试才能发现其意义，虽然自己从两年前就开始使用了，但是也只是勉强能给出符合项目要求的配置而已。最近webpack4发布了，自己又从头开始仔细读了一下它的guide文档，并按照文档的示例跑了一遍，对webpack的几个核心概念终于有了稍微清晰的认识，这里记录一下  chunk chunk大概是文档中出现">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-11-22T02:08:42.000Z">
+<meta property="article:modified_time" content="2023-07-18T03:20:12.568Z">
+<meta property="article:author" content="wang xiantong">
+<meta property="article:tag" content="webpack">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">wang xiantong</h5>
+          <a href="mailto:174604588@qq.com" title="174604588@qq.com" class="mail">174604588@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/tomwang1013" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://www.weibo.com/tomwanglnnxq" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-link"></i>
+                关于
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">对webpack的几个核心概念的理解</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">对webpack的几个核心概念的理解</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-11-22T02:08:42.000Z" itemprop="datePublished" class="page-time">
+  2018-11-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+
+<article id="post-webpack-core-concepts"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">对webpack的几个核心概念的理解</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-11-22 10:08:42" datetime="2018-11-22T02:08:42.000Z"  itemprop="datePublished">2018-11-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style='display:none'>
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>webpack是公认的功能强大但是难用的工具，虽然文档很全，但是由于各种配置太多且很多配置只有经过测试才能发现其意义，虽然自己从两年前就开始使用了，但是也只是勉强能给出符合项目要求的配置而已。最近webpack4发布了，自己又从头开始仔细读了一下它的guide文档，并按照文档的示例跑了一遍，对webpack的几个核心概念终于有了稍微清晰的认识，这里记录一下</p>
+<ul>
+<li><p><strong>chunk</strong></p>
+<p>chunk大概是文档中出现最频繁的单词，它指的是webpack最终输出的文件。chunk有两种类型：</p>
+<ul>
+<li><p>entry chunk</p>
+<p>就是在entry配置中的入口文件，最终输出的文件名由另一个配置项<code>output.filename</code>决定</p>
+</li>
+<li><p>其他chunk</p>
+<p>除了entry chunk外，webpack会根据我们的配置及代码情况自动输出很多文件，如<code>optimization.splitChunks</code>提取出的公共文件，<code>dynamic.import</code>生成的延迟加载文件</p>
+<p>这种chunk的输出文件名由配置项<code>output.chunkFilename</code>决定</p>
+</li>
+</ul>
+</li>
+<li><p><strong>module</strong></p>
+<p>module就是我们代码中通过import或require引入的一个文件，可以是js，css或图片等等。注意它和chunk的不同：chunk是最终的输出文件，而module是编码时的内部引用</p>
+</li>
+<li><p><strong>runtime &amp; manifest</strong></p>
+<p>为了使得这一套打包系统能够正常工作，也就是浏览器引入我们最终生成的chunk文件后能运转起来，包括module的解析引用能顺利进行，webpack提供了一段支撑代码，就是runtime。runtime最主要的工作就是module依赖关系的解析及module的导入，所以，在runtime中我们还需要所有module的一些meta信息，如各个module的唯一标识id及关系等等，这些信息称为manifest</p>
+<p>这个runtime代码可以包含在entry chunk中，或者单独提取出来作为独立的<strong>runtime chunk</strong>；在html文件中，runtime chunk一般放在entry chunk前面</p>
+</li>
+<li><p><strong>caching</strong></p>
+<p>提到caching，标准的做法是做<a target="_blank" rel="noopener" href="https://webpack.js.org/guides/code-splitting/">code splitting</a>，将runtime代码, 第三方库代码及自己的代码分离开来打成独立的chunk并在chunk的输出文件名中带上chunkhash：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output</span>: &#123;</span><br><span class="line">  <span class="attr">filename</span>: <span class="string">&#x27;[name].bundle.[contenthash].js&#x27;</span>,</span><br><span class="line">  <span class="attr">chunkFilename</span>: <span class="string">&#x27;[name].bundle.[contenthash].js&#x27;</span>,</span><br><span class="line">  <span class="attr">path</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&#x27;dist&#x27;</span>)</span><br><span class="line">&#125;,</span><br><span class="line"><span class="attr">optimization</span>: &#123;</span><br><span class="line">  <span class="attr">runtimeChunk</span>: <span class="string">&#x27;single&#x27;</span>,</span><br><span class="line">  <span class="attr">splitChunks</span>: &#123;</span><br><span class="line">    <span class="attr">cacheGroups</span>: &#123;</span><br><span class="line">      <span class="attr">vender</span>: &#123;</span><br><span class="line">        <span class="attr">test</span>: <span class="regexp">/[\\/]node_modules[\\/]/</span>,</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;vendors&#x27;</span>,</span><br><span class="line">        <span class="attr">chunks</span>: <span class="string">&#x27;all&#x27;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样会打出三个chunk文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">                           Asset       Size  Chunks                    Chunk Names</span><br><span class="line">  vendor.a7561fb0e9a071baadb9.js     541 kB       0  [emitted]  [big]  vendor</span><br><span class="line">    main.b746e3eb72875af2caa9.js    1.22 kB       1  [emitted]         main</span><br><span class="line">manifest.1400d5af64fc1b7b3a45.js    5.85 kB       2  [emitted]         manifest</span><br><span class="line">                      index.html  352 bytes          [emitted]</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>但是<em>这还不够</em>：如果这时候我们增加或删除一个module，这三个chunk的内容都可能发生变化；原因是<strong>默认情况下module的id是按照引用顺序从0递增</strong>，所以增加或删除module会导致其他module的id发生变化。要避免这种情况，就要让module的id只和自己有关，这个时候就要用到<a target="_blank" rel="noopener" href="https://webpack.js.org/plugins/hashed-module-ids-plugin">HashedModuleIdsPlugin</a>，它使得module的id和自己内容的hash绑定，只要内容不变，id就不变：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">plugins</span>: [</span><br><span class="line">	<span class="keyword">new</span> webpack.<span class="title class_">HashedModuleIdsPlugin</span>()</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>待续…</p>
+</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2023-07-18T03:20:12.568Z" itemprop="dateUpdated">2023-07-18 11:20:12</time>
+</span><br>
+
+
+    </div>
+    
+    <footer>
+        <a href="http://tomwang1013.github.io">
+            <img src="/img/avatar.jpg" alt="wang xiantong">
+            wang xiantong
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webpack/" rel="tag">webpack</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webpack-core-concepts/&title=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webpack-core-concepts/&title=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webpack-core-concepts/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webpack-core-concepts/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webpack-core-concepts/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/responsive-image-core-concepts/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">响应式图片设计的几个核心概念</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/sop-csp-intro/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Same-origin policy(SOP)和Content Security Policy(CSP)拾遗</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style='display:none'>
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style='display:none'>
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>wang xiantong &copy; 2015 - 2023</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webpack-core-concepts/&title=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webpack-core-concepts/&title=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webpack-core-concepts/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《对webpack的几个核心概念的理解》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webpack-core-concepts/&via=http://tomwang1013.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webpack-core-concepts/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/webpack-core-concepts/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
