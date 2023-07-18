@@ -14,28 +14,31 @@
     
     
     
-    <title>webgl-coordinate | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
+    <title>webgl-lighting | tomwang1013的学习总结 | 今歌爸爸的学习记录及生活点滴</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="theme-color" content="#3F51B5">
     
     
     <meta name="keywords" content="webgl">
-    <meta name="description" content="WebGL coordinates tips Fragment shader only accepts a normalized and left-handed cube. Each axis begins from -1 to 1 and any contents out of it will be cut out. As to lefted-handed, it means positive">
+    <meta name="description" content="light sourcesdirectional light  Light is coming uniformly from one direction independently of the object position. The object’s color depends on 3 parts:  light color light direction surface direction">
 <meta property="og:type" content="article">
-<meta property="og:title" content="webgl-coordinate">
-<meta property="og:url" content="http://tomwang1013.github.io/webgl-coordinate/index.html">
+<meta property="og:title" content="webgl-lighting">
+<meta property="og:url" content="http://tomwang1013.github.io/webgl-lighting/index.html">
 <meta property="og:site_name" content="tomwang1013的学习总结">
-<meta property="og:description" content="WebGL coordinates tips Fragment shader only accepts a normalized and left-handed cube. Each axis begins from -1 to 1 and any contents out of it will be cut out. As to lefted-handed, it means positive">
+<meta property="og:description" content="light sourcesdirectional light  Light is coming uniformly from one direction independently of the object position. The object’s color depends on 3 parts:  light color light direction surface direction">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://tomwang1013.github.io/images/norm_cube.png">
-<meta property="og:image" content="http://tomwang1013.github.io/images/final_step.png">
-<meta property="article:published_time" content="2023-07-18T05:48:42.000Z">
-<meta property="article:modified_time" content="2023-07-18T05:51:37.116Z">
+<meta property="og:image" content="http://tomwang1013.github.io/images/directional_light.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/point-light.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/spot-light.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/specular-highlights.png">
+<meta property="og:image" content="http://tomwang1013.github.io/images/specular-compute.png">
+<meta property="article:published_time" content="2023-07-18T07:38:47.000Z">
+<meta property="article:modified_time" content="2023-07-18T09:51:57.100Z">
 <meta property="article:author" content="wang xiantong">
 <meta property="article:tag" content="webgl">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://tomwang1013.github.io/images/norm_cube.png">
+<meta name="twitter:image" content="http://tomwang1013.github.io/images/directional_light.png">
     
         <link rel="alternate" type="application/atom+xml" title="tomwang1013的学习总结" href="/atom.xml">
     
@@ -130,7 +133,7 @@
         <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
           <i class="icon icon-lg icon-navicon"></i>
         </a>
-        <div class="flex-col header-title ellipsis">webgl-coordinate</div>
+        <div class="flex-col header-title ellipsis">webgl-lighting</div>
         
         <div class="search-wrap" id="search-wrap">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
@@ -152,10 +155,10 @@
 <header class="content-header post-header">
 
     <div class="container fade-scale">
-        <h1 class="title">webgl-coordinate</h1>
+        <h1 class="title">webgl-lighting</h1>
         <h5 class="subtitle">
             
-                <time datetime="2023-07-18T05:48:42.000Z" itemprop="datePublished" class="page-time">
+                <time datetime="2023-07-18T07:38:47.000Z" itemprop="datePublished" class="page-time">
   2023-07-18
 </time>
 
@@ -177,18 +180,18 @@
     <aside class="post-widget">
         <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
             <h4>TOC</h4>
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#WebGL-coordinates-tips"><span class="post-toc-number">1.</span> <span class="post-toc-text">WebGL coordinates tips</span></a></li></ol>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#light-sources"><span class="post-toc-number">1.</span> <span class="post-toc-text">light sources</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#directional-light"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">directional light</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#point-light"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">point light</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#ambient-light"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">ambient light</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#spot-light"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">spot light</span></a></li></ol></li><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#reflection-types"><span class="post-toc-number">2.</span> <span class="post-toc-text">reflection types</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#diffuse-reflection"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">diffuse reflection</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#specular-reflection"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">specular reflection</span></a></li></ol></li></ol>
         </nav>
     </aside>
 
 
-<article id="post-webgl-coordinate"
+<article id="post-webgl-lighting"
   class="post-article article-type-post fade" itemprop="blogPost">
 
     <div class="post-card">
-        <h1 class="post-card-title">webgl-coordinate</h1>
+        <h1 class="post-card-title">webgl-lighting</h1>
         <div class="post-meta">
-            <time class="post-time" title="2023-07-18 13:48:42" datetime="2023-07-18T05:48:42.000Z"  itemprop="datePublished">2023-07-18</time>
+            <time class="post-time" title="2023-07-18 15:38:47" datetime="2023-07-18T07:38:47.000Z"  itemprop="datePublished">2023-07-18</time>
 
             
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
@@ -203,25 +206,33 @@
 
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
-            <h1 id="WebGL-coordinates-tips"><a href="#WebGL-coordinates-tips" class="headerlink" title="WebGL coordinates tips"></a>WebGL coordinates tips</h1><ol>
-<li><p>Fragment shader only accepts a normalized and <strong>left-handed</strong> cube. Each axis begins from <code>-1</code> to <code>1</code> and any contents out of it will be cut out. As to lefted-handed, it means positive z axis points into the screen and points with bigger z will be in the back of points with smaller z.<br> <img src="/../images/norm_cube.png" alt="cube"></p>
-<p> So it is the vertex shader’s responsibility to output <em>positions</em> within this normalized cube with any way.</p>
-</li>
-<li><p>We(vertex shader) usually take 4 steps to output this normalized cube:</p>
-<ol>
-<li><p>modeling in <strong>local coordinate system</strong></p>
-</li>
-<li><p>transformation with <em>model matrix</em>(<code>translate(),rotate(),scale()</code>) to get positions in <strong>world coordinates</strong></p>
-</li>
-<li><p>set up the camara with <em>view matrix</em>(<code>lookAt()</code>) to get positions in <strong>view coordinate</strong></p>
-</li>
-<li><p>projection(orthogonal or perspective) with <em>projection matrix</em>(<code>setOrtho(), setPerspective()</code>) to get positions in <strong>clipping coordinate</strong>(i.e. <em><strong>the normalized cube</strong></em>)</p>
-<p> For step 1 ~ step 3, we use <em>right-handed coordinate</em> in general. In step 4, positions are transformed from right-handed to left-handed clipping coordinate. From now on, WebGL takes in charge. It maps positions in the normalized cube(positions out of it will be cut out) to the cavans, using z-value(usually be re-mapped from (-1, 1) to (0, 1), i.e. 0 represents the device’s screen) for depth test:</p>
-<p> <img src="/../images/final_step.png" alt="final display"></p>
-</li>
-</ol>
-</li>
-</ol>
+            <h1 id="light-sources"><a href="#light-sources" class="headerlink" title="light sources"></a>light sources</h1><h2 id="directional-light"><a href="#directional-light" class="headerlink" title="directional light"></a>directional light</h2><p>  Light is coming uniformly from one direction independently of the object position. The object’s color depends on 3 parts:</p>
+<ul>
+<li>light color</li>
+<li>light direction</li>
+<li>surface direction(<code>normal</code>)</li>
+<li>object’s original color</li>
+</ul>
+<p>  <img src="/../images/directional_light.png" alt="theta"></p>
+<p>  let <code>theta</code> be the angle of <code>reverse of light direction</code> and <code>surface direction</code>, then:</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reflection color = light color x original color x cos(theta)</span><br></pre></td></tr></table></figure>
+
+<h2 id="point-light"><a href="#point-light" class="headerlink" title="point light"></a>point light</h2><p>  Same as directional light with only one difference: the light direction is on longer fixed. It points from light’s position to object’s position. So we need to calculate each vertex’s light direction(usually do it in <code>fragment shader</code>). </p>
+<p>  <img src="/../images/point-light.png" alt="point light"></p>
+<h2 id="ambient-light"><a href="#ambient-light" class="headerlink" title="ambient light"></a>ambient light</h2><p>  In reality, we can see objects without point light or sunshine. That’s what ambient light do. Calculation of ambient reflection color is very simple:</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reflection color = light color x original color</span><br></pre></td></tr></table></figure>
+
+<p>  We see the same color from all directions.</p>
+<h2 id="spot-light"><a href="#spot-light" class="headerlink" title="spot light"></a>spot light</h2><p>  Point light goes in all directions from that point while spot light has a limit range. Within that range we light the same as point light otherwise we don’t light at all. We set a specific direction for the spot light with a angle range symmetrically distributing around it. From this angle limit, we compute a <code>dot</code> limit.</p>
+<p>  <img src="/../images/spot-light.png" alt="spot light"></p>
+  <figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dotFromDirection = <span class="built_in">dot</span>(surfaceToLight, -lightDirection)</span><br><span class="line"><span class="keyword">if</span> (dotFromDirection &gt;= limitInDotSpace) &#123;</span><br><span class="line">  <span class="comment">// do the lighting like point light</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="reflection-types"><a href="#reflection-types" class="headerlink" title="reflection types"></a>reflection types</h1><h2 id="diffuse-reflection"><a href="#diffuse-reflection" class="headerlink" title="diffuse reflection"></a>diffuse reflection</h2><p>  For rough surfaces, the light reflects uniformly in all directions, i.e. we see the same color from all directions. This is <code>diffuse reflection</code> which is used in <code>directional light</code> and <code>point light</code>.</p>
+<h2 id="specular-reflection"><a href="#specular-reflection" class="headerlink" title="specular reflection"></a>specular reflection</h2><p>  As opposed to diffuse reflection, if the surface is shiny like a mirror, it looks brightest from a special direction:</p>
+<p>  <img src="/../images/specular-highlights.png" alt="specular reflection"></p>
+<p>  The computation of specular reflection color is as follows:</p>
+<p>  <img src="/../images/specular-compute.png" alt="specular computation"></p>
+  <figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> specular = <span class="built_in">dot</span>(normal, halfVector);</span><br><span class="line"><span class="built_in">gl_FragColor</span>.rgb += specular * specular_color;</span><br></pre></td></tr></table></figure>
 
         </div>
 
@@ -230,7 +241,7 @@
     <div class="content">
         
 <span class="post-time">
-    最后更新时间：<time datetime="2023-07-18T05:51:37.116Z" itemprop="dateUpdated">2023-07-18 13:51:37</time>
+    最后更新时间：<time datetime="2023-07-18T09:51:57.100Z" itemprop="dateUpdated">2023-07-18 17:51:57</time>
 </span><br>
 
 
@@ -259,7 +270,7 @@
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-lighting/&title=《webgl-lighting》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -269,22 +280,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-lighting/&title=《webgl-lighting》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-lighting/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-coordinate》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-coordinate/&via=http://tomwang1013.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-lighting》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-lighting/&via=http://tomwang1013.github.io" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-lighting/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -304,21 +315,14 @@
     </div>
 
     
-<nav class="post-nav flex-row flex-justify-between">
-  
-    <div class="waves-block waves-effect prev">
-      <a href="/webgl-lighting/" id="post-prev" class="post-nav-link">
-        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">webgl-lighting</h4>
-      </a>
-    </div>
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
   
 
   
     <div class="waves-block waves-effect next">
-      <a href="/webpack-hot-loader-react/" id="post-next" class="post-nav-link">
+      <a href="/webgl-coordinate/" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">webpack-hot-loader-react</h4>
+        <h4 class="title">webgl-coordinate</h4>
       </a>
     </div>
   
@@ -392,7 +396,7 @@
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://tomwang1013.github.io/webgl-lighting/&title=《webgl-lighting》 — tomwang1013的学习总结&pic=http://tomwang1013.github.io/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -402,22 +406,22 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-coordinate/&title=《webgl-coordinate》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://tomwang1013.github.io/webgl-lighting/&title=《webgl-lighting》 — tomwang1013的学习总结&source=web开发，前端技术总结" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://tomwang1013.github.io/webgl-lighting/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-coordinate》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-coordinate/&via=http://tomwang1013.github.io" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《webgl-lighting》 — tomwang1013的学习总结&url=http://tomwang1013.github.io/webgl-lighting/&via=http://tomwang1013.github.io" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-coordinate/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://tomwang1013.github.io/webgl-lighting/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -428,7 +432,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/webgl-coordinate/" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://tomwang1013.github.io/webgl-lighting/" alt="微信分享二维码">
 </div>
 
 
