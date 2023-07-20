@@ -6,7 +6,7 @@
   <link href="http://tomwang1013.github.io/atom.xml" rel="self"/>
   
   <link href="http://tomwang1013.github.io/"/>
-  <updated>2023-07-18T09:51:57.100Z</updated>
+  <updated>2023-07-20T04:08:55.699Z</updated>
   <id>http://tomwang1013.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>webgl-cullface</title>
+    <link href="http://tomwang1013.github.io/webgl-cullface/"/>
+    <id>http://tomwang1013.github.io/webgl-cullface/</id>
+    <published>2023-07-20T03:04:07.000Z</published>
+    <updated>2023-07-20T04:08:55.699Z</updated>
+    
+    <content type="html"><![CDATA[<p>Say we has a triangle as follows:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">   v0</span><br><span class="line">  /  \</span><br><span class="line"> /    \</span><br><span class="line">v1————v2</span><br></pre></td></tr></table></figure><p>And we pass it to webgl in the order of <code>(v0, v1, v2)</code>, i.e. <code>counter-clockwise(CCW)</code>.</p><p>Whether this triangle is drawn(rasterized) depends on 3 factors:</p><ol><li><p>Whether the triangle is <code>front facing</code> or <code>back facing</code></p><p> To determine it, firstly we use the following formula to compute its area:</p><p> <img src="/../images/area-compute.png" alt="compute area"></p><p> <code>i⊕1</code> is <code>(i+1) mod n</code>. The interpretation of the sign of this value is controlled with:</p> <figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> FrontFace( enum dir );</span><br></pre></td></tr></table></figure><p> Setting dir to CCW (corresponding to counter-clockwise orientation of the projected polygon in window coordinates) indicates that the sign of a should be reversed prior to use. Setting dir to CW (corresponding to clockwise orientation)uses the sign of a is as computed above. Front face determination requires one bit of state, and is <em>initially set to CCW</em>.</p><p> If the sign of the area computed by equation 3.4 (including the possible reversal of this sign as indicated by the last call to <code>FrontFace</code>) is <code>positive</code>, the polygon is <code>front facing</code>; otherwise, it is back facing</p></li><li><p>Whether face culling is turned on or off</p><p> This is controlled by <code>gl.enable/disable(gl.CULL_FACE)</code> which is disabled by default.</p></li><li><p>The mode of face culling</p><p> If face culling is turned on, we can controll which face to cull by calling:</p> <figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> CullFace( enum mode );</span><br></pre></td></tr></table></figure><p> mode is a symbolic constant: one of FRONT, BACK or FRONT_AND_BACK, which is BACK by default.</p></li></ol><p>After all the above values are known, Front facing triangles are rasterized if either culling is disabled or the CullFace mode is BACK while back facing polygons are rasterized only if either culling is disabled or the CullFace mode is FRONT.</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;Say we has a triangle as follows:&lt;/p&gt;
+&lt;figure class=&quot;highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="programming" scheme="http://tomwang1013.github.io/categories/programming/"/>
+    
+    
+    <category term="webgl" scheme="http://tomwang1013.github.io/tags/webgl/"/>
+    
+  </entry>
   
   <entry>
     <title>webgl-lighting</title>
