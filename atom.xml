@@ -6,7 +6,7 @@
   <link href="http://tomwang1013.github.io/atom.xml" rel="self"/>
   
   <link href="http://tomwang1013.github.io/"/>
-  <updated>2023-07-20T04:08:55.699Z</updated>
+  <updated>2023-07-24T09:39:05.834Z</updated>
   <id>http://tomwang1013.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>webgl-camera-visualization</title>
+    <link href="http://tomwang1013.github.io/webgl-camara-visualize/"/>
+    <id>http://tomwang1013.github.io/webgl-camara-visualize/</id>
+    <published>2023-07-24T03:30:43.000Z</published>
+    <updated>2023-07-24T09:39:05.834Z</updated>
+    
+    <content type="html"><![CDATA[<p>3D viewing is a difficult problem to master for beginners of webgl like me. <strong>Model matrix</strong>, <strong>view matrix</strong>, <strong>projection matrix</strong>, <strong>camara position</strong>, <strong>local coordinates</strong>, <strong>world coordinates</strong>, <strong>view coordinates</strong>, <strong>windows coordinates</strong>, <strong>left-hand coordinates</strong>, <strong>right-hand coordinates</strong>, etc. So many buzz words exist just to paint a point on screen! The key point is how the scene looks like from the point view of camera. So if we can visualize it(camera looking at the scene) correctly, we can get some deep insight into the mysterious 3D viewing. Let’s do it <em>theoretically</em>.</p><p>At first, i want to show you a graph which contains the essence of 3D viewing.</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="../images/coordinates-transform.png" alt="coordinates transform" title="">                </div>                <div class="image-caption">coordinates transform</div>            </figure><p>That is the normal process of setting up 3D models and viewing it. We use <code>Mm</code>, <code>Mv</code>, <code>Mp</code> to represent <code>model matrix</code>, <code>view matrix</code>, <code>project matrix</code> respectively, then <code>gl_Position</code> can be computed as:</p><figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">gl_Position</span> = Mp * Mv * Mm * [original(local) position]</span><br></pre></td></tr></table></figure><p>The result of <code>Mp * Mv * Mm</code> is usually named as <code>MVP</code> matrix: <code>Mmvp</code>.</p><p>A clipping normalized cube with a range of <code>(-1, 1)</code> for each axis is used to cut out all the points whose <code>gl_Position</code> is outside of the cube. It is <strong>our</strong> job to compute <code>gl_Position</code> with all the matrices(or with no matrix as long as that gl_Position is inside the cube if you want to show your model). WebGL is responsible for the last step: get the final position in <code>window coordinate</code>, i.e. compute the <code>gl_FragCoord</code>. We normally just set the viewport and don’t care about it:</p><figure class="highlight glsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gl.viewport(x, y, w, h);</span><br></pre></td></tr></table></figure><p>You can refer to the <a href="https://registry.khronos.org/OpenGL/specs/es/2.0/es_full_spec_2.0.pdf">spec</a> to figure out how it is computed.</p><p>Ok, preparatory work is done. Let’s shift to business. To visualize a camera looking at some objects, we need a second camera:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">camera2 looking at camera1 which is looking at some object</span><br></pre></td></tr></table></figure><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="../images/camera-view2.png" alt="2 cameras" title="">                </div>                <div class="image-caption">2 cameras</div>            </figure><p>Two major steps are taken to do it:</p><p><strong>Firstly</strong>, draw the left part: the object being looked at from <code>camera1</code>, use matrices as follows:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mmvp = Mp1 * Mv1 * Mm1</span><br></pre></td></tr></table></figure><p>This step is easy to understand.</p><p><strong>Secondly</strong>, draw the right part: the object &amp; camera1 being looked at from <code>camera2</code>:</p><ol><li><p>Draw the object:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mmvp = Mp2 * Mv2 * Mm2</span><br></pre></td></tr></table></figure><p>No much to say.</p></li><li><p>Draw camera1:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mmvp = Mp2 * Mv2 * (inverse of Mv1)</span><br></pre></td></tr></table></figure><p>Why the <code>model matrix</code> of camera1 from the view of camera2 is <code>inverse of Mv1</code>? Well, when setting up the camera, we can move the camera or move the scene. Both are inverse process of each other:</p><p><img src="/../images/view-matrix.png" alt="view matrix"></p></li><li><p>Draw the frustum which is transformed to a normalized cube:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mmvp = Mp2 * Mv2 * (inverse of Mv1) * (inverse of Mp1)</span><br></pre></td></tr></table></figure><p>It is the most difficult part to understand. We want to know the cube’s position in <code>world coordinate</code> which the model matrix represents. We should firstly ask where does the normalized cube come from? Yes, it comes from a <code>MVP</code> transformation performed by <strong>camera1</strong>:</p><p><img src="/../images/frustum-cube.png" alt="frustum-cube"></p><p>So we deduce reversely and get model matrix: <code>(inverse of Mv1) * (inverse of Mp1)</code>.</p></li></ol><p>Game over theoretically! If you want a real and practical example, please refer to this <a href="https://webglfundamentals.org/webgl/lessons/webgl-visualizing-the-camera.html">great article</a>.</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;3D viewing is a difficult problem to master for beginners of webgl like me. &lt;strong&gt;Model matrix&lt;/strong&gt;, &lt;strong&gt;view matrix&lt;/strong&gt;, </summary>
+      
+    
+    
+    
+    <category term="programming" scheme="http://tomwang1013.github.io/categories/programming/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>webgl-cullface</title>

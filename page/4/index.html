@@ -165,6 +165,60 @@
     <ul class="post-list">
     
         <li class="post-list-item fade">
+            <article id="post-pwa-storage"
+  class="article-card article-type-post" itemprop="blogPost">
+
+    <div class="post-meta">
+        <time class="post-time" title="2018-10-12 21:20:44" datetime="2018-10-12T13:20:44.000Z"  itemprop="datePublished">2018-10-12</time>
+
+        
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
+
+
+
+    </div>
+
+    
+
+
+  
+    <h3 class="post-title" itemprop="name">
+      <a class="post-title-link" href="/pwa-storage/">PWA之存储简介</a>
+    </h3>
+  
+
+
+
+
+    <div class="post-content" id="post-content" itemprop="postContent">
+
+    
+        浏览器端有多种存储方式，作为PWA程序该如何选择离线存储方式呢？首先我们看看典型的web程序有哪些数据需要存储。浏览器端的数据分两类：
+
+静态资源：如html，css，js，image等和某个URL关联的请求资源
+动态数据：如动态请求后端接口返回的一些状态信息等，通常是ajax请求返回的
+
+总结来看：
+
+对静态资源(URL addressable resources)，我们使用Cache A...
+    
+
+        <a href="/pwa-storage/" class="post-more waves-effect waves-button">
+            阅读全文…
+        </a>
+    </div>
+    
+    <div class="post-footer">
+        
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/pwa/" rel="tag">pwa</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/storage/" rel="tag">storage</a></li></ul>
+
+    </div>
+    
+</article>
+
+        </li>
+    
+        <li class="post-list-item fade">
             <article id="post-offline-cookbook"
   class="article-card article-type-post" itemprop="blogPost">
 
@@ -632,60 +686,12 @@ Blob构造函数：...
 
         </li>
     
-        <li class="post-list-item fade">
-            <article id="post-promise-race-transform"
-  class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-05-12 12:49:24" datetime="2018-05-12T04:49:24.000Z"  itemprop="datePublished">2018-05-12</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/programming/">programming</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/promise-race-transform/">Promise.race一种变形：any resolve =&gt; resolve, all reject =&gt; reject实现</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        我们知道，pr = Promise.race[promises]的意思是promises中任何一个resolve会导致pr变成resolve，任何一个reject会导致pr变成reject，但是有时候我们需要这样的逻辑：resolve和race一样，但是必须是promises中所有的都是reject，pr才变成reject，该怎么办？偶然在网上看到一个实现，很精妙，估记录一下：
-123456...
-    
-
-        <a href="/promise-race-transform/" class="post-more waves-effect waves-button">
-            阅读全文…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/es6/" rel="tag">es6</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/promise/" rel="tag">promise</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
     </ul>
 
     
 <nav id="page-nav">
     <div class="inner">
-    <a class="extend prev" rel="prev" href="/page/3/">上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    <a class="extend prev" rel="prev" href="/page/3/">上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/">下一页</a>
     </div>
 </nav>
 
